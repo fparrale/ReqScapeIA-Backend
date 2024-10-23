@@ -1,0 +1,9 @@
+# Activar el motor de reescritura
+RewriteEngine On
+
+# Si el archivo o directorio solicitado no existe
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Redirigir todas las solicitudes a index.php
+RewriteRule ^ index.php [L]

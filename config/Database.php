@@ -1,12 +1,21 @@
 <?php
 class Database {
     
-    private $host = 'mysql';
-    private $db_name = 'my_database';
-    private $username = 'user';
-    private $password = 'password';
-    
     public $conn;
+    
+    private $host;    
+    private $db_name; 
+    private $username;
+    private $password;
+
+    public function __construct() {
+        $this->conn = null;
+
+        $this->host = getenv('DB_HOST');
+        $this->db_name = getenv('DB_NAME');
+        $this->username = getenv('DB_USER');
+        $this->password = getenv('DB_PASSWORD');
+    }
 
     public function getConnection() {
         $this->conn = null;

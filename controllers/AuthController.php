@@ -13,10 +13,61 @@ class AuthController {
     
     public function register() {
         $data = json_decode(file_get_contents('php://input'), true);
-        $first_name = $data['first_name'];
-        $last_name = $data['last_name'];
-        $email = $data['email'];
-        $password = password_hash($data['password'], PASSWORD_DEFAULT);
+        $first_name = $data['first_name'] ?? null;
+        $last_name = $data['last_name'] ?? null;
+        $email = $data['email'] ?? null;
+        $comparePassword = $data['password'];
+
+        if (strlen($comparePassword) <= 5 ) {
+            $response = [
+                'ok' => false,
+                'message' => 'The password must be more than 5 characters long.',
+                'user' => null,
+            ];
+
+            http_response_code(400);
+            echo json_encode($response);
+            return;
+        }
+
+        $password = password_hash($data['password'], PASSWORD_DEFAULT) ?? null;
+
+        if (empty($first_name) || empty($last_name) || empty($email) || empty($password)) {
+            $response = [
+                'ok' => false,
+                'message' => 'All fields are required and cannot be empty: first name, last name, email, and password.',
+                'user' => null,
+            ];
+
+            http_response_code(400);
+            echo json_encode($response);
+            return;
+        }
+
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $response = [
+                'ok' => false,
+                'message' => 'Invalid email format.',
+                'user' => null,
+            ];
+
+            http_response_code(400);
+            echo json_encode($response);
+            return;
+        }
+
+        if (strpos($email, '@ug.edu.ec') === false || substr($email, -9) !== 'ug.edu.ec') {
+            $response = [
+                'ok' => false,
+                'message' => 'Email must be from the @ug.edu.ec domain.',
+                'user' => null,
+            ];
+
+            http_response_code(400);
+            echo json_encode($response);
+            return;
+        }
 
         $takenUser = $this->getUserFromDB($email);
 

@@ -1,10 +1,10 @@
 <?php
 class Database {
-    
+
     public $conn;
-    
-    private $host;    
-    private $db_name; 
+
+    private $host;
+    private $db_name;
     private $username;
     private $password;
 

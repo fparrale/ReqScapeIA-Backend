@@ -24,7 +24,7 @@ function handleRoute($route, $method) {
         $authController->refreshToken($payload['id'], $payload['email']);
     }
 
-    
+
     // Protected routes
     if ($method === 'GET' && $route === '/users') {
         AuthMiddleware::validateToken();

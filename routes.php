@@ -31,7 +31,7 @@ function handleRoute($route, $method) {
         return;
     }
 
-    if (str_starts_with($route, '/assistant')) {
+    if ($method === 'GET' && str_starts_with($route, '/assistant')) {
         AuthMiddleware::validateToken();
         $assistantController->generateRequeriments();
         return;

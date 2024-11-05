@@ -13,7 +13,7 @@ class RoomController{
         $isAdmin = $this->getUserFromDB($email);
 
         switch ($isAdmin) {
-            case true:
+            case false: // TODO: TRUE
                 $room_code = $data['room_code'] ?? null;
                 $room_name = $data['room_name'] ?? null;
                 $max_attempts = $data['max_attempts'] ?? null;
@@ -28,10 +28,10 @@ class RoomController{
                     return;
                 }
 
-                $room_exists = $this->getRoomFromDB($room_name);
+                $room_exists = $this->getRoomFromDB($room_name, $room_code);
                 if ($room_exists) {
                     http_response_code(400);
-                    echo json_encode(['message' => 'Nombre de sala ya existe, intenta con otro']);
+                    echo json_encode(['message' => $room_exists]);
                     return;
                 } else {
                     if (is_null($max_attempts)) {
@@ -59,7 +59,7 @@ class RoomController{
                 }
             break;
 
-            case false:
+            case true: //TODO: FALSE
                 http_response_code(400);
                 echo json_encode(['message' => 'Acceso denegado. Solo los administradores pueden crear salas.']);
                 return;
@@ -88,17 +88,100 @@ class RoomController{
         return $result['role'] === 'admin';
     }
 
-    private function getRoomFromDB($room_name) {
-        $query = "SELECT * FROM rooms WHERE room_name = :room_name";
-        $stmt = $this->db->prepare($query);
-        $stmt->bindParam(':room_name', $room_name);
-        $stmt->execute();
+    private function getRoomFromDB($room_name, $room_code) {
+        $queryName = "SELECT * FROM rooms WHERE room_name = :room_name";
+        $stmtName = $this->db->prepare($queryName);
+        $stmtName->bindParam(':room_name', $room_name);
+        $stmtName->execute();
+        $resultName = $stmtName->fetch(PDO::FETCH_ASSOC);
 
-        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        return !empty($result);
+        $queryCode = "SELECT * FROM rooms WHERE room_code = :room_code";
+        $stmtCode = $this->db->prepare($queryCode);
+        $stmtCode->bindParam(':room_code', $room_code);
+        $stmtCode->execute();
+        $resultCode = $stmtCode->fetch(PDO::FETCH_ASSOC);
+
+        if ($resultName && $resultCode) {
+            return "El nombre de la sala ($room_name) y el código ($room_code) ya existen.";
+        } elseif ($resultName) {
+            return "El nombre de la sala ($room_name) ya existe.";
+        } elseif ($resultCode) {
+            return "El código ($room_code) ya existe.";
+        }
+
+        return false;
     }
 
+    public function joinRoom($id, $email) {
+        $data = json_decode(file_get_contents('php://input'), true);
+        $room_code = $data['room_code'] ?? null;
 
+        if (!$room_code) {
+            http_response_code(400);
+            echo json_encode(['message' => 'Código de sala no proporcionado.']);
+            return;
+        }
+
+        // Verificar si la sala existe y obtener max_attempts
+        $queryRoom = "SELECT id, room_name, max_attempts FROM rooms WHERE room_code = :room_code";
+        $stmtRoom = $this->db->prepare($queryRoom);
+        $stmtRoom->bindParam(':room_code', $room_code);
+        $stmtRoom->execute();
+        $room = $stmtRoom->fetch(PDO::FETCH_ASSOC);
+
+        if (!$room) {
+            http_response_code(400);
+            echo json_encode(['message' => 'La sala con el código proporcionado no existe.']);
+            return;
+        }
+
+        $room_name = $room['room_name'];
+
+        // Contar los intentos realizados por el usuario en esta sala
+        $queryAttempts = "SELECT COUNT(*) AS total_attempts FROM tried WHERE user_id = :user_id AND room_id = :room_id";
+        $stmtAttempts = $this->db->prepare($queryAttempts);
+        $stmtAttempts->bindParam(':user_id', $id);
+        $stmtAttempts->bindParam(':room_id', $room['id']);
+        $stmtAttempts->execute();
+        $attempts = $stmtAttempts->fetch(PDO::FETCH_ASSOC);
+        $totalAttempts = $attempts['total_attempts'];
+
+        // Verificar si los intentos son ilimitados
+        if ($room['max_attempts'] == -1) {
+            http_response_code(200); // Código de estado HTTP 200: OK
+            echo json_encode([
+                'message' => 'Intentos ilimitados en esta sala.',
+                'attempts' => "$totalAttempts / ∞",
+                'room_name' => "$room_name",
+                'room_code' => "$room_code"
+            ]);
+            return;
+        }
+
+        // Verificar si el usuario ha alcanzado el límite de intentos
+        if ($totalAttempts >= $room['max_attempts']) {
+            http_response_code(403); // Código de estado HTTP 403: Forbidden
+            echo json_encode([
+                'message' => 'Acceso denegado: Has alcanzado el número máximo de intentos en esta sala.',
+                'attempts' => "$totalAttempts / {$room['max_attempts']}",
+                'room_name' => "$room_name",
+                'room_code' => "$room_code"
+            ]);
+            return;
+        }
+
+        // Permitir el ingreso si le quedan intentos
+        $remainingAttempts = $room['max_attempts'] - $totalAttempts;
+        http_response_code(200);
+        echo json_encode([
+            'message' => 'Acceso permitido',
+            'remaining_attempts' => $remainingAttempts,
+            'attempts' => "$totalAttempts / {$room['max_attempts']}",
+            'room_name' => "$room_name",
+            'room_code' => "$room_code"
+        ]);
+        return;
+    }
 }
 
 ?>

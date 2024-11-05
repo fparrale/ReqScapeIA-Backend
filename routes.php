@@ -48,5 +48,12 @@ function handleRoute($route, $method) {
         $roomController -> createRoom($payload['id'], $payload['email']);
         return;
     }
+
+    if($method === 'POST' && $route === '/join-room' ){
+        $payload = AuthMiddleware::validateToken();
+        $roomController -> joinRoom($payload['id'], $payload['email']);
+        return;
+    }
+
 }
 ?>

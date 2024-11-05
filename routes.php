@@ -1,6 +1,7 @@
 <?php
 require_once 'controllers/AuthController.php';
 require_once 'controllers/UserController.php';
+require_once 'controllers/RoomController.php';
 require_once 'controllers/AssistantController.php';
 
 require_once 'middleware/AuthMiddleware.php';
@@ -10,6 +11,7 @@ function handleRoute($route, $method) {
     $authController = new AuthController();
     $userController = new UserController();
     $assistantController = new AssistantController();
+    $roomController = new RoomController();
 
 
     // Public routes
@@ -39,6 +41,11 @@ function handleRoute($route, $method) {
     if ($method === 'GET' && $route === '/users') {
         AuthMiddleware::validateToken();
         $userController->getAllUsers();
+        return;
+    }
+    if($method === 'POST' && $route === '/create-room' ){
+        $payload = AuthMiddleware::validateToken();
+        $roomController -> createRoom($payload['id'], $payload['email']);
         return;
     }
 }

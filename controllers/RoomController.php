@@ -13,7 +13,7 @@ class RoomController{
         $isAdmin = $this->getUserFromDB($email);
 
         switch ($isAdmin) {
-            case false: // TODO: TRUE
+            case true: // TODO: TRUE
                 $room_code = $data['room_code'] ?? null;
                 $room_name = $data['room_name'] ?? null;
                 $max_attempts = $data['max_attempts'] ?? null;
@@ -59,7 +59,7 @@ class RoomController{
                 }
             break;
 
-            case true: //TODO: FALSE
+            case false: //TODO: FALSE
                 http_response_code(400);
                 echo json_encode(['message' => 'Acceso denegado. Solo los administradores pueden crear salas.']);
                 return;

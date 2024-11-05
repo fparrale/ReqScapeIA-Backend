@@ -17,6 +17,9 @@ DB_NAME=
 DB_USER=
 DB_ROOT_PASSWORD=
 DB_PASSWORD=
+
+OPENAI_API_KEY=
+SOF_REQ_ASSISTANT_ID=
 ```
 
 3. Construir la imagen Docker

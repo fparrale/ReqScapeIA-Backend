@@ -57,7 +57,6 @@ function handleRoute($route, $method) {
         return;
     }
 
-    // TODO: save attempt
     if($method === 'POST' && $route === '/save-tried' ){
         $payload = AuthMiddleware::validateToken();
         $triedController -> saveTried($payload['id'], $payload['email']);
@@ -67,6 +66,12 @@ function handleRoute($route, $method) {
     if($method === 'POST' && $route === '/show-stats' ){
         $payload = AuthMiddleware::validateToken();
         $triedController -> showStats($payload['id'], $payload['email']);
+        return;
+    }
+
+    if($method === 'POST' && $route === '/show-all-stats' ){
+        $payload = AuthMiddleware::validateToken();
+        $triedController -> showAllStats($payload['id'], $payload['email']);
         return;
     }
 

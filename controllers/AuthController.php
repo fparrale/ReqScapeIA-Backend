@@ -1,24 +1,20 @@
 <?php
 require_once 'services/JWTService.php';
 require_once 'config/Database.php';
-require_once 'models/User.php';
+require_once 'services/UserService.php';
 
-class AuthController {
-    private $db;
+class AuthController
+{
 
-    public function __construct() {
-        $this->db = (new Database())->getConnection();
-    }
-
-
-    public function register() {
+    public static function register()
+    {
         $data = json_decode(file_get_contents('php://input'), true);
         $first_name = $data['first_name'] ?? null;
         $last_name = $data['last_name'] ?? null;
         $email = $data['email'] ?? null;
         $comparePassword = $data['password'];
 
-        if (strlen($comparePassword) <= 5 ) {
+        if (strlen($comparePassword) <= 5) {
             $response = [
                 'ok' => false,
                 'message' => 'The password must be more than 5 characters long.',
@@ -69,7 +65,7 @@ class AuthController {
             return;
         }
 
-        $takenUser = $this->getUserFromDB($email);
+        $takenUser = UserService::getByEmail($email);
 
         if ($takenUser) {
             $response = [
@@ -85,15 +81,15 @@ class AuthController {
         }
 
         $query = "INSERT INTO users (first_name, last_name, email, password) VALUES (:first_name, :last_name, :email, :password)";
-        $stmt = $this->db->prepare($query);
+        $stmt = Database::getConn()->prepare($query);
         $stmt->bindParam(':first_name', $first_name);
         $stmt->bindParam(':last_name', $last_name);
         $stmt->bindParam(':email', $email);
         $stmt->bindParam(':password', $password);
 
         if ($stmt->execute()) {
-            $user = $this->getUserFromDB($email);
-            $response = $this->generateLoginResponse($user);
+            $user = UserService::getByEmail($email);
+            $response = self::generateLoginResponse($user);
             http_response_code(201);
         } else {
             $response = [
@@ -107,12 +103,13 @@ class AuthController {
         echo json_encode($response);
     }
 
-    public function login() {
+    public static function login()
+    {
         $data = json_decode(file_get_contents('php://input'), true);
         $email = $data['email'];
         $password = $data['password'];
 
-        $user = $this->getUserFromDB($email);
+        $user = UserService::getByEmail($email);
 
         if (!$user) {
             $response = [
@@ -138,14 +135,15 @@ class AuthController {
             return;
         }
 
-        $response = $this->generateLoginResponse($user);
+        $response = self::generateLoginResponse($user);
 
         http_response_code(200);
         echo json_encode($response);
     }
 
-    public function refreshToken($id, $email) {
-        $user = $this->getUserFromDB($email);
+    public static function refreshToken($id, $email)
+    {
+        $user = UserService::getByEmail($email);
 
         if (!$user) {
             $response = [
@@ -159,34 +157,19 @@ class AuthController {
             return;
         }
 
-        $response = $this->generateLoginResponse($user);
+        $response = self::generateLoginResponse($user);
         http_response_code(200);
         echo json_encode($response);
     }
 
-    private function generateLoginResponse($user) {
+    private static function generateLoginResponse($user)
+    {
         $token = JWTService::generateJWT($user['id'], $user['email']);
 
         return [
             'ok' => true,
             'token' => $token,
-            'user' => User::getUserInfo($user),
+            'user' => UserService::getInfo($user),
         ];
     }
-
-    private function getUserFromDB($email) {
-        $query = "SELECT * FROM users WHERE email = :email";
-        $stmt = $this->db->prepare($query);
-        $stmt->bindParam(':email', $email);
-        $stmt->execute();
-
-        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        if (empty($result)) {
-            return null;
-        }
-
-        return $result[0];
-    }
 }
-

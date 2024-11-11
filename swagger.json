@@ -1,0 +1,235 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Sofware Requirements Game API",
+    "description": "API para el juego de clasificación de requerimientos de software.",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Authentication endpoints"
+    },
+    {
+      "name": "Rooms",
+      "description": "Room management endpoints"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "ok": { "type": "boolean" },
+          "token": { "type": "string" },
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer" },
+              "email": { "type": "string" },
+              "first_name": { "type": "string" },
+              "last_name": { "type": "string" },
+              "role": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [{ "bearerAuth": [] }],
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "security": [],
+        "tags": ["Auth"],
+        "summary": "Login de usuario",
+        "description": "Autentica a un usuario y devuelve un token.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login exitoso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "security": [],
+        "tags": ["Auth"],
+        "summary": "Registro de usuario",
+        "description": "Registra un nuevo usuario en el sistema.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" },
+                  "password": { "type": "string" },
+                  "first_name": { "type": "string" },
+                  "last_name": { "type": "string" }
+                },
+                "required": ["email", "password", "first_name", "last_name"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Registro exitoso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/refresh-token": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Refrescar token de usuario",
+        "description": "Refresca el token de usuario actual.",
+        "responses": {
+          "200": {
+            "description": "Token refrescado exitosamente",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AuthResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/assistant/generate-requirements": {
+      "get": {
+        "tags": ["Assistant"],
+        "summary": "Generar requerimientos",
+        "description": "Genera requerimientos para una sessión de juego.",
+        "responses": {
+          "200": {
+            "description": "Requerimientos generados exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "requirements": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "no": {
+                            "type": "integer",
+                            "description": "Número identificador del requerimiento"
+                          },
+                          "text": {
+                            "type": "string",
+                            "description": "Texto del requerimiento"
+                          },
+                          "isValid": {
+                            "type": "boolean",
+                            "description": "Indica si el requerimiento está bien formulado"
+                          },
+                          "feedback": {
+                            "type": "string",
+                            "description": "Retroalimentación sobre la validez del requerimiento"
+                          }
+                        },
+                        "required": ["no", "text", "isValid", "feedback"]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rooms": {
+      "get": {
+        "tags": ["Rooms"],
+        "summary": "Obtener todas las salas creadas por el usuario autenticado",
+        "responses": {
+          "200": {
+            "description": "Lista de salas creadas por el usuario autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "description": "Identificador único de la sala"
+                      },
+                      "room_name": {
+                        "type": "string",
+                        "description": "Nombre de la sala"
+                      },
+                      "room_code": {
+                        "type": "string",
+                        "description": "Código único de la sala"
+                      },
+                      "user_id": {
+                        "type": "integer",
+                        "description": "ID del usuario creador de la sala"
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Fecha y hora de creación de la sala"
+                      },
+                      "max_attempts": {
+                        "type": "integer",
+                        "description": "Número máximo de intentos permitidos"
+                      }
+                    },
+                    "required": ["id", "room_name", "room_code", "user_id", "created_at", "max_attempts"]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,17 +1,12 @@
 <?php
-
 require_once 'config/Database.php';
 
-class TriedController{
-    private $db;
-
-    public function __construct(){
-        $this->db = (new DataBase()) -> getConnection();
-    }
-
-    public function getRoomId($room_name, $room_code) {
+class TriedController
+{
+    public static function getRoomId($room_name, $room_code)
+    {
         $queryRoom = "SELECT id FROM rooms WHERE room_name = :room_name AND room_code = :room_code LIMIT 1";
-        $stmtRoom = $this->db->prepare($queryRoom);
+        $stmtRoom = Database::getConn()->prepare($queryRoom);
         $stmtRoom->bindParam(':room_name', $room_name, PDO::PARAM_STR);
         $stmtRoom->bindParam(':room_code', $room_code, PDO::PARAM_STR);
 
@@ -23,7 +18,8 @@ class TriedController{
         }
     }
 
-    public function saveTried($id, $email) {
+    public static function saveTried($id, $email)
+    {
         $data = json_decode(file_get_contents('php://input'), true);
         $room_name = $data['room_name'] ?? null;
         $room_code = $data['room_code'] ?? null;
@@ -33,7 +29,7 @@ class TriedController{
         $status = $data['status'] ?? null;
         $time = $data['time'] ?? null;
 
-        $room_id = $this->getRoomId($room_name, $room_code);
+        $room_id = self::getRoomId($room_name, $room_code);
 
         echo $room_id;
 
@@ -45,7 +41,7 @@ class TriedController{
 
         $query = "INSERT INTO tried (user_id, room_id, totalreq, movements, score, status, time)
             VALUES (:user_id, :room_id, :totalreq, :movements, :score, :status, :time)";
-        $stmt = $this->db->prepare($query);
+        $stmt = Database::getConn()->prepare($query);
 
         $stmt->bindParam(':user_id', $id, PDO::PARAM_INT);
         $stmt->bindParam(':room_id', $room_id, PDO::PARAM_INT);
@@ -66,16 +62,17 @@ class TriedController{
         }
     }
 
-    public function showStats($id, $email){
+    public static function showStats($id, $email)
+    {
         $query = "SELECT t.id, t.room_id, t.totalreq, t.movements, t.score, t.status, t.time, t.created_at, r.room_name
                 FROM tried t
                 JOIN rooms r ON t.room_id = r.id
                 WHERE t.user_id = :user_id";
 
-        $stmt = $this->db->prepare($query);
+        $stmt = Database::getConn()->prepare($query);
         $stmt->bindParam(':user_id', $id, PDO::PARAM_INT);
 
-        if($stmt->execute()){
+        if ($stmt->execute()) {
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             $groupedResults = [];
@@ -102,9 +99,10 @@ class TriedController{
         }
     }
 
-    public function showAllStats($id, $email){
+    public static function showAllStats($id, $email)
+    {
         $query = "SELECT role FROM users WHERE id = :user_id AND email = :email";
-        $stmt = $this->db->prepare($query);
+        $stmt = Database::getConn()->prepare($query);
         $stmt->bindParam(':user_id', $id, PDO::PARAM_INT);
         $stmt->bindParam(':email', $email, PDO::PARAM_STR);
 
@@ -124,7 +122,7 @@ class TriedController{
             JOIN users u ON t.user_id = u.id
             WHERE r.user_id = :id";
 
-            $stmt = $this->db->prepare($query);
+            $stmt = Database::getConn()->prepare($query);
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
 
             if ($stmt->execute()) {
@@ -192,5 +190,3 @@ class TriedController{
         }
     }
 }
-
-?>

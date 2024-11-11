@@ -1,18 +1,15 @@
 <?php
-// CORS
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Headers: Authorization, Content-Type");
-// JSON
-header('Content-Type: application/json');
+
+require_once 'config/ApiConfig.php';
+ApiConfig::cors();
+ApiConfig::json();
 
 // Load environment variables
 require_once 'config/Environment.php';
 Environment::loadEnv(__DIR__ . '/.env');
 
-
 $uri = trim($_SERVER['REQUEST_URI'], '/');
 $method = $_SERVER['REQUEST_METHOD'];
-
 
 $basePath = "api/$uri";
 $methodFilePath = "$basePath.php";
@@ -23,7 +20,6 @@ if (file_exists($methodFilePath)) {
 } elseif (file_exists($indexFilePath)) {
     require $indexFilePath;
 } else {
-
     header("HTTP/1.0 404 Not Found");
     echo json_encode(['error' => 'Endpoint not found']);
 }

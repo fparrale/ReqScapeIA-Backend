@@ -7,4 +7,11 @@ $payload = AuthMiddleware::validateToken();
 $user_id = $payload['id'];
 $email = $payload['email'];
 
-AuthController::refreshToken($user_id, $email);
+$method = $_SERVER['REQUEST_METHOD'];
+
+if ($method === 'GET') {
+    AuthController::refreshToken($user_id, $email);
+} else {
+    header("HTTP/1.0 405 Method Not Allowed");
+    echo json_encode(['error' => 'Method not allowed']);
+}

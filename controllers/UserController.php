@@ -2,17 +2,12 @@
 require_once 'config/Database.php';
 require_once 'models/User.php';
 
-class UserController {
-    private $db;
-
-    public function __construct() {
-        $this->db = (new Database())->getConnection();
-    }
-
-    public function getAllUsers() {
-
+class UserController
+{
+    public static function getAllUsers()
+    {
         $query = "SELECT * FROM users";
-        $stmt = $this->db->prepare($query);
+        $stmt = Database::getConn()->prepare($query);
         $stmt->execute();
         $usersFromDB = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -26,4 +21,3 @@ class UserController {
         echo json_encode($users);
     }
 }
-?>

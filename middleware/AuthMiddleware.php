@@ -1,8 +1,10 @@
 <?php
 require_once 'services/JWTService.php';
 
-class AuthMiddleware {
-    public static function validateToken() {
+class AuthMiddleware
+{
+    public static function validateToken()
+    {
 
         $headers = getallheaders();
 
@@ -25,4 +27,3 @@ class AuthMiddleware {
         return $payload;
     }
 }
-?>

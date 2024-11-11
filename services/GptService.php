@@ -1,23 +1,25 @@
 <?php
 
-class GptService {
-
+class GptService
+{
     private $apiKey;
     private $assistantId;
     private $threadsEndpoint = 'https://api.openai.com/v1/threads';
 
     private $ch;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->apiKey = getenv('OPENAI_API_KEY');
         $this->assistantId = getenv('SOF_REQ_ASSISTANT_ID');
     }
 
-    private function prepareAPI($endpoint, $method, $additionalHeaders = [], $data = []) {
+    private function prepareAPI($endpoint, $method, $additionalHeaders = [], $data = [])
+    {
         $this->ch = curl_init($endpoint);
-        
+
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
-        
+
         if ($method === 'POST') {
             curl_setopt($this->ch, CURLOPT_POST, true);
             curl_setopt($this->ch, CURLOPT_POSTFIELDS, json_encode($data));
@@ -37,7 +39,8 @@ class GptService {
         curl_setopt($this->ch, CURLOPT_HTTPHEADER, $headers);
     }
 
-    private function createThread() {
+    private function createThread()
+    {
         $this->prepareAPI($this->threadsEndpoint, 'POST', [
             'OpenAI-Beta: assistants=v2',
         ]);
@@ -51,7 +54,8 @@ class GptService {
         return $response['id'];
     }
 
-    private function createRun($threadId, $assistantId) {
+    private function createRun($threadId, $assistantId)
+    {
         $endpoint = $this->threadsEndpoint . '/' . $threadId . '/runs';
 
         $data = [
@@ -71,7 +75,8 @@ class GptService {
         return $response['id'];
     }
 
-    private function checkCompleteStatus($threadId, $runId) {
+    private function checkCompleteStatus($threadId, $runId)
+    {
         $endpoint = $this->threadsEndpoint . '/' . $threadId . '/runs/' . $runId;
 
         $this->prepareAPI($endpoint, 'GET', [
@@ -84,7 +89,7 @@ class GptService {
         }
 
         $response = json_decode($response, true);
-        
+
         if ($response['status'] === 'completed') {
             return $response['status'];
         }
@@ -94,10 +99,11 @@ class GptService {
         return $this->checkCompleteStatus($threadId, $runId);
     }
 
-    private function getGeneratedConent($threadId) {
+    private function getGeneratedConent($threadId)
+    {
         $endpoint = $this->threadsEndpoint . '/' . $threadId . '/messages';
 
-        $this->prepareAPI($endpoint, 'GET',[
+        $this->prepareAPI($endpoint, 'GET', [
             'OpenAI-Beta: assistants=v2',
         ]);
         $response = curl_exec($this->ch);
@@ -113,10 +119,11 @@ class GptService {
         return $content;
     }
 
-    public function generateRequeriments() {
+    public function generateRequirements()
+    {
         $threadId = $this->createThread();
         $runId = $this->createRun($threadId, $this->assistantId);
-        
+
         $this->checkCompleteStatus($threadId, $runId);
 
         $content = $this->getGeneratedConent($threadId);

@@ -1,18 +1,22 @@
 <?php
-class JWTPayload {
+class JWTPayload
+{
     public $id;
     public $email;
     public $exp;
 }
 
-class JWTService {
+class JWTService
+{
     private static $secretKey = '8f890bf03eea60ae2c136b6e3b22afd6480ae5711635038dfe6de4646592a16d';
 
-    public static function base64UrlEncode($data) {
+    public static function base64UrlEncode($data)
+    {
         return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
     }
 
-    public static function generateJWT($id, $email) {
+    public static function generateJWT($id, $email)
+    {
         $payload = new JWTPayload();
         $payload->id = $id;
         $payload->email = $email;
@@ -28,7 +32,8 @@ class JWTService {
         return $base64UrlHeader . "." . $base64UrlPayload . "." . $base64UrlSignature;
     }
 
-    public static function verifyJWT($jwt) {
+    public static function verifyJWT($jwt)
+    {
         list($header, $payload, $signature) = explode('.', $jwt);
         $validSignature = self::base64UrlEncode(hash_hmac('sha256', $header . "." . $payload, self::$secretKey, true));
 
@@ -45,5 +50,3 @@ class JWTService {
         return $payloadArray;
     }
 }
-
-?>

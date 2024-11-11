@@ -5,7 +5,6 @@ class AuthMiddleware
 {
     public static function validateToken()
     {
-
         $headers = getallheaders();
 
         if (!isset($headers['Authorization'])) {

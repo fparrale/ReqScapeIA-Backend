@@ -35,4 +35,24 @@ class UserService
             "role" => $user['role'],
         ];
     }
+
+    public static function createUser(UserEntity $user)
+    {
+        $query = "INSERT INTO users (first_name, last_name, email, password, role) VALUES (:first_name, :last_name, :email, :password, :role)";
+        $stmt = Database::getConn()->prepare($query);
+        $stmt->bindParam(':first_name', $user->firstName);
+        $stmt->bindParam(':last_name', $user->lastName);
+        $stmt->bindParam(':email', $user->email);
+        $stmt->bindParam(':password', $user->password);
+        $stmt->bindParam(':role', $user->role);
+        $stmt->execute();
+        return Database::getConn()->lastInsertId();
+    }
+
+    public static function deleteAll()
+    {
+        $query = "DELETE FROM users";
+        $stmt = Database::getConn()->prepare($query);
+        $stmt->execute();
+    }
 }

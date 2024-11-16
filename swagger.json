@@ -40,6 +40,40 @@
             }
           }
         }
+      },
+      "RoomResponse": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "description": "Identificador único de la sala"
+            },
+            "room_name": {
+              "type": "string",
+              "description": "Nombre de la sala"
+            },
+            "room_code": {
+              "type": "string",
+              "description": "Código único de la sala"
+            },
+            "user_id": {
+              "type": "integer",
+              "description": "ID del usuario creador de la sala"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Fecha y hora de creación de la sala"
+            },
+            "max_attempts": {
+              "type": "integer",
+              "description": "Número máximo de intentos permitidos"
+            }
+          },
+          "required": ["id", "room_name", "room_code", "user_id", "created_at", "max_attempts"]
+        }
       }
     }
   },
@@ -192,6 +226,53 @@
             "content": {
               "application/json": {
                 "schema": {
+                  "$ref": "#/components/schemas/RoomResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Rooms"],
+        "summary": "Crear una sala",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "room_code": { "type": "string" },
+                  "room_name": { "type": "string" },
+                  "max_attempts": { "type": "integer" }
+                },
+                "required": ["room_code", "room_name", "max_attempts"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sala creada exitosamente",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/RoomResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rooms/enrolled": {
+      "get": {
+        "tags": ["Rooms"],
+        "summary": "Obtener todas las salas inscritas por el usuario autenticado",
+        "responses": {
+          "200": {
+            "description": "Lista de salas inscritas por el usuario autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
                   "type": "array",
                   "items": {
                     "type": "object",
@@ -208,10 +289,6 @@
                         "type": "string",
                         "description": "Código único de la sala"
                       },
-                      "user_id": {
-                        "type": "integer",
-                        "description": "ID del usuario creador de la sala"
-                      },
                       "created_at": {
                         "type": "string",
                         "format": "date-time",
@@ -220,11 +297,211 @@
                       "max_attempts": {
                         "type": "integer",
                         "description": "Número máximo de intentos permitidos"
+                      },
+                      "teacher_id": {
+                        "type": "integer",
+                        "description": "ID del profesor que creó la sala"
+                      },
+                      "teacher_email": {
+                        "type": "string",
+                        "description": "Email del profesor"
+                      },
+                      "teacher_name": {
+                        "type": "string",
+                        "description": "Nombre completo del profesor"
                       }
                     },
-                    "required": ["id", "room_name", "room_code", "user_id", "created_at", "max_attempts"]
+                    "required": ["id", "room_name", "room_code", "created_at", "max_attempts", "teacher_id", "teacher_email", "teacher_name"]
                   }
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rooms/enroll": {
+      "post": {
+        "tags": ["Rooms"],
+        "summary": "Inscribirse en una sala",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "room_code": { "type": "string" }
+                },
+                "required": ["room_code"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Inscripción exitosa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/attempts": {
+      "post": {
+        "tags": ["Attempts"],
+        "summary": "Registrar un intento de juego al iniciar una partida",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "room_code": { "type": "string" },
+                  "totalreq": { "type": "integer" }
+                },
+                "required": ["room_code", "totalreq"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Intento registrado exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "integer", "description": "Identificador único del intento" }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error al registrar el intento",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object", "properties": { "message": { "type": "string" } } }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Attempts"],
+        "summary": "Actualizar el estado y las estadisticas de una partida.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "attemptId": { "type": "integer" },
+                  "status": { "type": "string" },
+                  "score": { "type": "number" },
+                  "movements": { "type": "integer" },
+                  "time": { "type": "string" }
+                },
+                "required": ["attemptId", "status", "score", "movements", "time"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Estadisticas y estado actualizados exitosamente",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object", "properties": { "message": { "type": "string" } } }
+              }
+            }
+          },
+          "500": {
+            "description": "Error al actualizar las estadisticas y el estado del intento",
+            "content": {
+              "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" } } } }
+            }
+          }
+        }
+      }
+    },
+    "/student/history": {
+      "get": {
+        "tags": ["Student"],
+        "summary": "Obtener el historial de juegos de un estudiante",
+        "description": "Obtiene el historial de juegos de un estudiante a partir de su email.",
+        "responses": {
+          "200": {
+            "description": "Historial de juegos obtenido exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "user_id": {
+                        "type": "integer"
+                      },
+                      "room_id": {
+                        "type": "integer"
+                      },
+                      "totalreq": {
+                        "type": "integer"
+                      },
+                      "movements": {
+                        "type": "integer"
+                      },
+                      "score": {
+                        "type": "number"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "time": {
+                        "type": "string"
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "room_name": {
+                        "type": "string"
+                      },
+                      "room_code": {
+                        "type": "string"
+                      },
+                      "max_attempts": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/seed": {
+      "get": {
+        "tags": ["Database"],
+        "summary": "Ejecutar seed inicial de desarrollo",
+        "security": [{"basicAuth": []}],
+        "responses": {
+          "200": {
+            "description": "Seed ejecutado con éxito",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object", "properties": { "message": { "type": "string" } } }
               }
             }
           }

@@ -19,15 +19,23 @@ CREATE TABLE IF NOT EXISTS rooms (
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
-CREATE TABLE IF NOT EXISTS tried (
+CREATE TABLE IF NOT EXISTS enrolled_rooms (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  room_id INT NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (room_id) REFERENCES rooms(id)
+);
+
+CREATE TABLE IF NOT EXISTS attempts (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,
   room_id INT NOT NULL,
   totalreq INT NOT NULL,
-  movements INT NOT NULL,
-  score INT NOT NULL,
-  status ENUM('completed', 'abandoned') NOT NULL,
-  time TIME NOT NULL COMMENT 'time in the format: 00:01:35',
+  movements INT NOT NULL DEFAULT 0,
+  score FLOAT NOT NULL DEFAULT 0,
+  status ENUM('completed', 'abandoned') NOT NULL DEFAULT 'abandoned',
+  time TIME COMMENT 'time in the format: 00:01:35',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id),
   FOREIGN KEY (room_id) REFERENCES rooms(id)

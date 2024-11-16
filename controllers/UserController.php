@@ -1,6 +1,6 @@
 <?php
 require_once 'config/Database.php';
-require_once 'models/User.php';
+require_once 'services/UserService.php';
 
 class UserController
 {
@@ -14,7 +14,7 @@ class UserController
         $users = [];
 
         foreach ($usersFromDB as $user) {
-            $users[] = User::getUserInfo($user);
+            $users[] = UserService::getInfo($user);
         }
 
         http_response_code(200);

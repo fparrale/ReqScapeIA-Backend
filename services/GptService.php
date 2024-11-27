@@ -1,91 +1,85 @@
 <?php
 
+require_once 'entities/GameConfigEntity.php';
+
 class GptService
 {
-    private $apiKey;
-    private $assistantId;
-    private $threadsEndpoint = 'https://api.openai.com/v1/threads';
+    private static $threadsEndpoint = 'https://api.openai.com/v1/threads';
 
-    private $ch;
-
-    public function __construct()
+    private static function prepareAPI($endpoint, $method, $additionalHeaders = [], $data = [])
     {
-        $this->apiKey = getenv('OPENAI_API_KEY');
-        $this->assistantId = getenv('SOF_REQ_ASSISTANT_ID');
-    }
+        $ch = curl_init($endpoint);
 
-    private function prepareAPI($endpoint, $method, $additionalHeaders = [], $data = [])
-    {
-        $this->ch = curl_init($endpoint);
-
-        curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
         if ($method === 'POST') {
-            curl_setopt($this->ch, CURLOPT_POST, true);
-            curl_setopt($this->ch, CURLOPT_POSTFIELDS, json_encode($data));
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
         } else {
-            curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, $method);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
         }
 
         $headers = [
             'Content-Type: application/json',
-            'Authorization: Bearer ' . $this->apiKey,
+            'Authorization: Bearer ' . getenv('OPENAI_API_KEY'),
         ];
 
         if (!empty($additionalHeaders)) {
             $headers = array_merge($headers, $additionalHeaders);
         }
 
-        curl_setopt($this->ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        return $ch;
     }
 
-    private function createThread()
+    private static function createThread()
     {
-        $this->prepareAPI($this->threadsEndpoint, 'POST', [
+        $ch = self::prepareAPI(self::$threadsEndpoint, 'POST', [
             'OpenAI-Beta: assistants=v2',
         ]);
-        $response = curl_exec($this->ch);
+        $response = curl_exec($ch);
 
-        if (curl_errno($this->ch)) {
-            throw new Exception('Error creating thread: ' . curl_error($this->ch));
+        if (curl_errno($ch)) {
+            throw new Exception('Error creating thread: ' . curl_error($ch));
         }
 
         $response = json_decode($response, true);
         return $response['id'];
     }
 
-    private function createRun($threadId, $assistantId)
+    private static function createRun($threadId, $assistantId)
     {
-        $endpoint = $this->threadsEndpoint . '/' . $threadId . '/runs';
+        $endpoint = self::$threadsEndpoint . '/' . $threadId . '/runs';
 
         $data = [
             'assistant_id' => $assistantId,
         ];
 
-        $this->prepareAPI($endpoint, 'POST', [
+        $ch = self::prepareAPI($endpoint, 'POST', [
             'OpenAI-Beta: assistants=v2',
         ], $data);
-        $response = curl_exec($this->ch);
+        $response = curl_exec($ch);
 
-        if (curl_errno($this->ch)) {
-            throw new Exception('Error creating run: ' . curl_error($this->ch));
+        if (curl_errno($ch)) {
+            throw new Exception('Error creating run: ' . curl_error($ch));
         }
 
         $response = json_decode($response, true);
         return $response['id'];
     }
 
-    private function checkCompleteStatus($threadId, $runId)
+    private static function checkCompleteStatus($threadId, $runId)
     {
-        $endpoint = $this->threadsEndpoint . '/' . $threadId . '/runs/' . $runId;
+        $endpoint = self::$threadsEndpoint . '/' . $threadId . '/runs/' . $runId;
 
-        $this->prepareAPI($endpoint, 'GET', [
+        $ch = self::prepareAPI($endpoint, 'GET', [
             'OpenAI-Beta: assistants=v2',
         ]);
-        $response = curl_exec($this->ch);
+        $response = curl_exec($ch);
 
-        if (curl_errno($this->ch)) {
-            throw new Exception('Error checking run status: ' . curl_error($this->ch));
+        if (curl_errno($ch)) {
+            throw new Exception('Error checking run status: ' . curl_error($ch));
         }
 
         $response = json_decode($response, true);
@@ -96,20 +90,41 @@ class GptService
 
         // Sleep for 1 second before checking again
         sleep(1);
-        return $this->checkCompleteStatus($threadId, $runId);
+        return self::checkCompleteStatus($threadId, $runId);
     }
 
-    private function getGeneratedConent($threadId)
+    private static function createMessage($threadId, $content)
     {
-        $endpoint = $this->threadsEndpoint . '/' . $threadId . '/messages';
+        $endpoint = self::$threadsEndpoint . '/' . $threadId . '/messages';
 
-        $this->prepareAPI($endpoint, 'GET', [
+        $data = [
+            'role' => 'user',
+            'content' => $content
+        ];
+
+        $ch = self::prepareAPI($endpoint, 'POST', [
+            'OpenAI-Beta: assistants=v2',
+        ], $data);
+        $response = curl_exec($ch);
+
+        if (curl_errno($ch)) {
+            throw new Exception('Error creating message: ' . curl_error($ch));
+        }
+
+        return $response;
+    }
+
+    private static function getGeneratedConent($threadId)
+    {
+        $endpoint = self::$threadsEndpoint . '/' . $threadId . '/messages';
+
+        $ch = self::prepareAPI($endpoint, 'GET', [
             'OpenAI-Beta: assistants=v2',
         ]);
-        $response = curl_exec($this->ch);
+        $response = curl_exec($ch);
 
-        if (curl_errno($this->ch)) {
-            throw new Exception('Error getting message list: ' . curl_error($this->ch));
+        if (curl_errno($ch)) {
+            throw new Exception('Error getting message list: ' . curl_error($ch));
         }
 
         $response = json_decode($response, true);
@@ -119,14 +134,31 @@ class GptService
         return $content;
     }
 
-    public function generateRequirements()
+    public static function generateRequirements(GameConfigEntity $gameConfig)
     {
-        $threadId = $this->createThread();
-        $runId = $this->createRun($threadId, $this->assistantId);
+        $threadId = self::createThread();
 
-        $this->checkCompleteStatus($threadId, $runId);
+        $languageMap = [
+            'es' => 'Español',
+            'en' => 'English',
+        ];
 
-        $content = $this->getGeneratedConent($threadId);
+        if (empty($gameConfig->language)) {
+            $gameConfig->language = 'es';
+        }
+
+        if (empty($gameConfig->additional_context)) {
+            $gameConfig->additional_context = 'Genera requerimientos para un proyecto de ingeniería de software.';
+        }
+
+        $userMessage = "Idioma: " . $languageMap[$gameConfig->language] . "\n" . "Contexto adicional: " . $gameConfig->additional_context;
+        self::createMessage($threadId, $userMessage);
+
+        $runId = self::createRun($threadId, getenv('SOF_REQ_ASSISTANT_ID'));
+
+        self::checkCompleteStatus($threadId, $runId);
+
+        $content = self::getGeneratedConent($threadId);
 
         return json_decode($content, true);
     }

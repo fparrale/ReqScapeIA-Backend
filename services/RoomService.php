@@ -1,24 +1,36 @@
 <?php
 
 require_once 'entities/RoomEntity.php';
+require_once 'entities/GameConfigEntity.php';
 require_once 'config/Database.php';
+require_once 'services/GptService.php';
 
 class RoomService
 {
-    public static function create(RoomEntity $room, $user_id)
+
+    public static function create(RoomEntity $room, GameConfigEntity $gameConfig, $user_id)
     {
-        $query = "INSERT INTO rooms (room_name, room_code, max_attempts, user_id) VALUES (:room_name, :room_code, :max_attempts, :user_id)";
+        $query = "INSERT INTO rooms (room_name, room_code, items_per_attempt, max_attempts, user_id) VALUES (:room_name, :room_code, :items_per_attempt, :max_attempts, :user_id)";
         $stmt = Database::getConn()->prepare($query);
         $stmt->bindParam(':room_name', $room->room_name);
         $stmt->bindParam(':room_code', $room->room_code);
+        $stmt->bindParam(':items_per_attempt', $room->items_per_attempt);
         $stmt->bindParam(':max_attempts', $room->max_attempts);
         $stmt->bindParam(':user_id', $user_id);
+
+        $roomId = null;
         if ($stmt->execute()) {
-            $lastId = Database::getConn()->lastInsertId();
-            return self::getById($lastId);
+            $roomId = Database::getConn()->lastInsertId();
+            $createdRoom = self::getById($roomId);
         } else {
             return null;
         }
+
+        $response = GptService::generateRequirements($gameConfig);
+
+        self::saveRequirements($roomId, $response['requirements']);
+
+        return $createdRoom;
     }
 
     public static function getAllByUserId($user_id)
@@ -104,5 +116,24 @@ class RoomService
         $query = "DELETE FROM rooms";
         $stmt = Database::getConn()->prepare($query);
         $stmt->execute();
+    }
+
+    public static function saveRequirements($room_id, $requirements)
+    {
+        foreach ($requirements as $requirement) {
+            $query = "INSERT INTO requirements (requirementText, isValid, feedbackText, room_id) VALUES (:requirementText, :isValid, :feedbackText, :room_id)";
+            $stmt = Database::getConn()->prepare($query);
+            $requirementText = htmlspecialchars($requirement['text']);
+            $feedbackText = htmlspecialchars($requirement['feedback']);
+            $stmt->bindParam(':requirementText', $requirementText);
+            $stmt->bindParam(':isValid', $requirement['isValid'], PDO::PARAM_INT);
+            $stmt->bindParam(':feedbackText', $feedbackText);
+            $stmt->bindParam(':room_id', $room_id);
+
+            if (!$stmt->execute()) {
+                return false;
+            }
+        }
+        return true;
     }
 }

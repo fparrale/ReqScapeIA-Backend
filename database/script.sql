@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS rooms (
   user_id INT NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   max_attempts INT NOT NULL DEFAULT -1 COMMENT '-1 to indicate unlimited',
+  items_per_attempt INT NOT NULL DEFAULT 5,
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
@@ -25,6 +26,8 @@ CREATE TABLE IF NOT EXISTS enrolled_rooms (
   room_id INT NOT NULL,
   FOREIGN KEY (user_id) REFERENCES users(id),
   FOREIGN KEY (room_id) REFERENCES rooms(id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS attempts (
@@ -40,3 +43,14 @@ CREATE TABLE IF NOT EXISTS attempts (
   FOREIGN KEY (user_id) REFERENCES users(id),
   FOREIGN KEY (room_id) REFERENCES rooms(id)
 );
+
+CREATE TABLE IF NOT EXISTS requirements (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    requirementText TEXT,
+    isValid BOOLEAN DEFAULT FALSE,
+    feedbackText TEXT,
+    room_id INT NOT NULL,
+    FOREIGN KEY (room_id) REFERENCES rooms(id)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE
+)

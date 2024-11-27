@@ -1,5 +1,4 @@
 <?php
-
 require_once 'controllers/AdminStatsController.php';
 require_once 'middleware/AuthMiddleware.php';
 

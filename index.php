@@ -1,10 +1,10 @@
 <?php
-
+// Configuración de la API
 require_once 'config/ApiConfig.php';
 ApiConfig::cors();
 ApiConfig::json();
 
-// Load environment variables
+// Cargar variables de entorno
 require_once 'config/Environment.php';
 Environment::loadEnv(__DIR__ . '/.env');
 

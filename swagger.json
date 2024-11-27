@@ -13,6 +13,10 @@
     {
       "name": "Rooms",
       "description": "Room management endpoints"
+    },
+    {
+      "name": "Admin",
+      "description": "Admin endpoints"
     }
   ],
   "components": {
@@ -41,44 +45,127 @@
           }
         }
       },
-      "RoomResponse": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "integer",
-              "description": "Identificador único de la sala"
-            },
-            "room_name": {
-              "type": "string",
-              "description": "Nombre de la sala"
-            },
-            "room_code": {
-              "type": "string",
-              "description": "Código único de la sala"
-            },
-            "user_id": {
-              "type": "integer",
-              "description": "ID del usuario creador de la sala"
-            },
-            "created_at": {
-              "type": "string",
-              "format": "date-time",
-              "description": "Fecha y hora de creación de la sala"
-            },
-            "max_attempts": {
-              "type": "integer",
-              "description": "Número máximo de intentos permitidos"
-            }
+      "Room": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Identificador único de la sala"
           },
-          "required": ["id", "room_name", "room_code", "user_id", "created_at", "max_attempts"]
+          "room_name": {
+            "type": "string",
+            "description": "Nombre de la sala"
+          },
+          "room_code": {
+            "type": "string",
+            "description": "Código único de la sala"
+          },
+          "user_id": {
+            "type": "integer",
+            "description": "ID del usuario creador de la sala"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Fecha y hora de creación de la sala"
+          },
+          "max_attempts": {
+            "type": "integer",
+            "description": "Número máximo de intentos permitidos"
+          }
+        },
+        "required": ["id", "room_name", "room_code", "user_id", "created_at", "max_attempts"]
+      },
+      "Requirement": {
+        "type": "object",
+        "properties": {
+          "no": { "type": "integer" },
+          "text": { "type": "string" },
+          "isValid": { "type": "boolean" },
+          "feedback": { "type": "string" }
+        }
+      },
+      "CourseStats": {
+        "type": "object",
+        "properties": {
+          "score_average": { "type": "number" },
+          "time_average": { "type": "number" },
+          "dropout_rate": { "type": "number" },
+          "grades_distribution": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/GradesDistribution" }
+          },
+          "total_attempts": { "type": "integer" }
+        }
+      },
+      "GradesDistribution": {
+        "type": "object",
+        "properties": {
+          "score_range": { "type": "string" },
+          "count": { "type": "integer" }
         }
       }
     }
   },
   "security": [{ "bearerAuth": [] }],
   "paths": {
+    "/admin/course-content": {
+      "post": {
+        "tags": ["Admin"],
+        "summary": "Obtener el banco de requerimientos de un curso",
+        "description": "Obtiene el banco de requerimientos generados en la creación del curso a partir de su ID.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "course_id": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Banco de requerimientos obtenido exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Requirement" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/course-stats": {
+      "post": {
+        "tags": ["Admin"],
+        "summary": "Obtener las estadisticas de un curso",
+        "description": "Obtiene las estadisticas de un curso a partir de su ID.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "course_id": { "type": "integer" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Estadisticas del curso obtenidas exitosamente",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CourseStats" } } }
+          }
+        }
+      }
+    },
     "/auth/login": {
       "post": {
         "security": [],
@@ -226,7 +313,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RoomResponse"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Room"
+                  }
                 }
               }
             }
@@ -256,7 +346,7 @@
             "description": "Sala creada exitosamente",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/RoomResponse" }
+                "schema": { "$ref": "#/components/schemas/Room" }
               }
             }
           }
@@ -275,43 +365,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "integer",
-                        "description": "Identificador único de la sala"
-                      },
-                      "room_name": {
-                        "type": "string",
-                        "description": "Nombre de la sala"
-                      },
-                      "room_code": {
-                        "type": "string",
-                        "description": "Código único de la sala"
-                      },
-                      "created_at": {
-                        "type": "string",
-                        "format": "date-time",
-                        "description": "Fecha y hora de creación de la sala"
-                      },
-                      "max_attempts": {
-                        "type": "integer",
-                        "description": "Número máximo de intentos permitidos"
-                      },
-                      "teacher_id": {
-                        "type": "integer",
-                        "description": "ID del profesor que creó la sala"
-                      },
-                      "teacher_email": {
-                        "type": "string",
-                        "description": "Email del profesor"
-                      },
-                      "teacher_name": {
-                        "type": "string",
-                        "description": "Nombre completo del profesor"
-                      }
-                    },
-                    "required": ["id", "room_name", "room_code", "created_at", "max_attempts", "teacher_id", "teacher_email", "teacher_name"]
+                    "$ref": "#/components/schemas/Room"
                   }
                 }
               }
@@ -343,7 +397,66 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RoomResponse"
+                  "$ref": "#/components/schemas/Room"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rooms/remove": {
+      "post": {
+        "tags": ["Rooms"],
+        "summary": "Eliminar una sala",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "room_id": { "type": "integer" } },
+                "required": ["room_id"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sala eliminada exitosamente.",
+            "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" } } } } }
+          }
+        }
+      }
+    },
+    "/attempts/check": {
+      "post": {
+        "tags": ["Attempts"],
+        "summary": "Revisar la cantidad de intentos restantes",
+        "description": "Revisa la cantidad de intentos restantes para una sala a partir de su código",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "room_code": { "type": "string" }
+                },
+                "required": ["room_code"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Respuesta con el número de intentos restantes y el máximo permitido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "remaining": { "type": "integer" },
+                    "max_attempts": { "type": "integer" }
+                  }
                 }
               }
             }
@@ -426,6 +539,39 @@
             "description": "Error al actualizar las estadisticas y el estado del intento",
             "content": {
               "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" } } } }
+            }
+          }
+        }
+      }
+    },
+    "/game/content": {
+      "post": {
+        "tags": ["Game"],
+        "summary": "Preparar el contenido del juego",
+        "description": "Prepara el contenido del juego para una sala a partir de su código",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "roomCode": { "type": "string" } },
+                "required": ["roomCode"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contenido del juego preparado exitosamente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Requirement"
+                  }
+                }
+              }
             }
           }
         }

@@ -1,5 +1,4 @@
 <?php
-
 require_once 'controllers/AdminStatsController.php';
 require_once 'middleware/AuthMiddleware.php';
 
@@ -11,4 +10,3 @@ $method = $_SERVER['REQUEST_METHOD'];
 if ($method === 'POST') {
     AdminStatsController::getStatsByCourse($email);
 }
-

@@ -1,5 +1,6 @@
 <?php
 require_once 'entities/UserEntity.php';
+require_once 'entities/GameConfigEntity.php';
 require_once 'services/UserService.php';
 require_once 'services/RoomService.php';
 
@@ -71,31 +72,22 @@ class SeedService
             [
                 'room_code' => 'SOF-S-MA-1-1',
                 'room_name' => 'Ingeniería de Requerimientos',
-                'max_attempts' => 3,
-            ],
-            [
-                'room_code' => 'SOF-S-MA-1-2',
-                'room_name' => 'Ingeniería de Software',
-                'max_attempts' => 4,
-            ],
-            [
-                'room_code' => 'SOF-S-MA-1-3',
-                'room_name' => 'Procesos de Software',
-                'max_attempts' => 5,
-            ],
-            [
-                'room_code' => 'SOF-S-MA-1-4',
-                'room_name' => 'Metodologías de Desarrollo de Software',
+                'items_per_attempt' => 5,
                 'max_attempts' => 3,
             ],
         ];
 
         foreach ($rooms as $room) {
-            RoomService::create(new RoomEntity(
-                $room['room_name'],
-                $room['room_code'],
-                $room['max_attempts']
-            ), $adminId);
+            RoomService::create(
+                new RoomEntity(
+                    $room['room_name'],
+                    $room['room_code'],
+                    $room['items_per_attempt'],
+                    $room['max_attempts'],
+                ),
+                new GameConfigEntity('es', 'Aplicación de gestión del tiempo.'),
+                $adminId
+            );
         }
     }
 }

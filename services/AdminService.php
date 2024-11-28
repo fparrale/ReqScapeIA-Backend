@@ -9,12 +9,8 @@ class AdminService
 {
     public static function getStatsByCourse($adminEmail, $courseId)
     {
-
-        if (!UserService::isAdmin($adminEmail)) {
-            http_response_code(403);
-            echo json_encode(['message' => 'Forbidden']);
-            exit;
-        }
+        self::checkIfAdmin($adminEmail);
+        self::checkIfRoomExists($courseId);
 
         $scoreAverage = self::getScoreAverageByCourse($courseId);
         $timeAverage = self::getTimeAverageByCourse($courseId);
@@ -159,11 +155,8 @@ class AdminService
 
     public static function getGeneratedRequirementsByCourse($adminEmail, $courseId)
     {
-        if (!UserService::isAdmin($adminEmail)) {
-            http_response_code(403);
-            echo json_encode(['message' => 'Forbidden']);
-            exit;
-        }
+        self::checkIfAdmin($adminEmail);
+        self::checkIfRoomExists($courseId);
 
         $query = "SELECT * FROM requirements WHERE room_id = :course_id";
 
@@ -186,5 +179,27 @@ class AdminService
         }
 
         return $formattedRequirements;
+    }
+
+    private static function checkIfRoomExists($courseId)
+    {
+        $roomExists = RoomService::getById($courseId);
+        if (!$roomExists) {
+            http_response_code(404);
+            echo json_encode(['message' => 'Room not found']);
+            exit;
+        }
+        return $roomExists;
+    }
+
+    private static function checkIfAdmin($adminEmail)
+    {
+        $isAdmin = UserService::isAdmin($adminEmail);
+        if (!$isAdmin) {
+            http_response_code(403);
+            echo json_encode(['message' => 'Forbidden']);
+            exit;
+        }
+        return $isAdmin;
     }
 }

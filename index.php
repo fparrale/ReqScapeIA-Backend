@@ -38,7 +38,7 @@ if (!$matched) {
     } elseif (file_exists($indexFilePath)) {
         require $indexFilePath;
     } else {
-        header("HTTP/1.0 404 Not Found");
-        echo json_encode(['error' => 'Endpoint not found']);
+        header("HTTP/1.0 404 No encontrado");
+        echo json_encode(['error' => 'Endpoint no encontrado']);
     }
 }

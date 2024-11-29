@@ -10,8 +10,8 @@ define('SEED_PASSWORD', getenv('SEED_PASSWORD'));
 if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($_SERVER['PHP_AUTH_PW']) ||
     $_SERVER['PHP_AUTH_USER'] !== SEED_USER || $_SERVER['PHP_AUTH_PW'] !== SEED_PASSWORD) {
     header('WWW-Authenticate: Basic realm="Restricted Area"');
-    header("HTTP/1.0 401 Unauthorized");
-    echo json_encode(['error' => 'Unauthorized']);
+    header("HTTP/1.0 401 No autorizado");
+    echo json_encode(['error' => 'No autorizado']);
     exit;
 }
 

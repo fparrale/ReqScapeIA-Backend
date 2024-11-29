@@ -17,7 +17,7 @@ class AuthController
         if (strlen($comparePassword) <= 5) {
             $response = [
                 'ok' => false,
-                'message' => 'The password must be more than 5 characters long.',
+                'message' => 'La contraseña debe tener más de 5 caracteres.',
                 'user' => null,
             ];
 
@@ -31,7 +31,7 @@ class AuthController
         if (empty($first_name) || empty($last_name) || empty($email) || empty($password)) {
             $response = [
                 'ok' => false,
-                'message' => 'All fields are required and cannot be empty: first name, last name, email, and password.',
+                'message' => 'Todos los campos son obligatorios y no pueden estar vacíos: nombre, apellido, correo electrónico y contraseña.',
                 'user' => null,
             ];
 
@@ -44,7 +44,7 @@ class AuthController
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $response = [
                 'ok' => false,
-                'message' => 'Invalid email format.',
+                'message' => 'Formato de correo electrónico no válido.',
                 'user' => null,
             ];
 
@@ -56,7 +56,7 @@ class AuthController
         if (strpos($email, '@ug.edu.ec') === false || substr($email, -9) !== 'ug.edu.ec') {
             $response = [
                 'ok' => false,
-                'message' => 'Email must be from the @ug.edu.ec domain.',
+                'message' => 'El correo electrónico debe ser del dominio @ug.edu.ec.',
                 'user' => null,
             ];
 
@@ -70,7 +70,7 @@ class AuthController
         if ($takenUser) {
             $response = [
                 'ok' => false,
-                'message' => 'User already registered',
+                'message' => 'Usuario ya registrado',
                 'user' => null,
             ];
 
@@ -94,7 +94,7 @@ class AuthController
         } else {
             $response = [
                 'ok' => false,
-                'message' => 'Registration failed',
+                'message' => 'Registro fallido',
                 'user' => null,
             ];
             http_response_code(500);
@@ -114,7 +114,7 @@ class AuthController
         if (!$user) {
             $response = [
                 'ok' => false,
-                'message' => 'User does not exist',
+                'message' => 'El usuario no existe',
                 'user' => null,
             ];
 
@@ -126,7 +126,7 @@ class AuthController
         if (!password_verify($password, $user['password'])) {
             $response = [
                 'ok' => false,
-                'message' => 'Invalid email or password',
+                'message' => 'Correo electrónico o contraseña no válidos',
                 'user' => null,
             ];
 
@@ -148,7 +148,7 @@ class AuthController
         if (!$user) {
             $response = [
                 'ok' => false,
-                'message' => 'User does not exist',
+                'message' => 'El usuario no existe',
                 'user' => null,
             ];
 

@@ -41,7 +41,7 @@ class GptService
         $response = curl_exec($ch);
 
         if (curl_errno($ch)) {
-            throw new Exception('Error creating thread: ' . curl_error($ch));
+            throw new Exception('Error al crear el hilo: ' . curl_error($ch));
         }
 
         $response = json_decode($response, true);
@@ -62,7 +62,7 @@ class GptService
         $response = curl_exec($ch);
 
         if (curl_errno($ch)) {
-            throw new Exception('Error creating run: ' . curl_error($ch));
+            throw new Exception('Error al crear la ejecución: ' . curl_error($ch));
         }
 
         $response = json_decode($response, true);
@@ -79,7 +79,7 @@ class GptService
         $response = curl_exec($ch);
 
         if (curl_errno($ch)) {
-            throw new Exception('Error checking run status: ' . curl_error($ch));
+            throw new Exception('Error al verificar el estado de la ejecución: ' . curl_error($ch));
         }
 
         $response = json_decode($response, true);
@@ -108,7 +108,7 @@ class GptService
         $response = curl_exec($ch);
 
         if (curl_errno($ch)) {
-            throw new Exception('Error creating message: ' . curl_error($ch));
+            throw new Exception('Error al crear el mensaje: ' . curl_error($ch));
         }
 
         return $response;
@@ -124,7 +124,7 @@ class GptService
         $response = curl_exec($ch);
 
         if (curl_errno($ch)) {
-            throw new Exception('Error getting message list: ' . curl_error($ch));
+            throw new Exception('Error al obtener la lista de mensajes: ' . curl_error($ch));
         }
 
         $response = json_decode($response, true);

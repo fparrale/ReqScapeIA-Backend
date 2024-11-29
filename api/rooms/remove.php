@@ -12,5 +12,5 @@ if ($method === 'POST') {
     RoomController::deleteRoom($email);
 } else {
     http_response_code(405);
-    echo json_encode(['message' => 'Method not allowed']);
+    echo json_encode(['message' => 'Método no permitido']);
 }

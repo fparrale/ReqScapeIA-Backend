@@ -10,7 +10,7 @@ class GameService
 
         if ($room === null) {
             http_response_code(404);
-            echo json_encode(['message' => 'Room not found']);
+            echo json_encode(['message' => 'Sala no encontrada']);
             exit;
         }
 

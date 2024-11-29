@@ -13,5 +13,5 @@ if ($method === 'GET') {
     AuthController::refreshToken($user_id, $email);
 } else {
     header("HTTP/1.0 405 Method Not Allowed");
-    echo json_encode(['error' => 'Method not allowed']);
+    echo json_encode(['error' => 'Método no permitido']);
 }

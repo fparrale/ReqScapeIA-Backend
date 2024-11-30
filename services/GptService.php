@@ -161,15 +161,25 @@ class GptService
             $gameConfig->additional_context = 'Genera requerimientos para un proyecto de ingeniería de software.';
         }
 
+        // Enviar la solicitud inicial al asistente
         $userMessage = "Idioma: " . $languageMap[$gameConfig->language] . "\n" . "Contexto adicional: " . $gameConfig->additional_context;
         self::createMessage($threadId, $userMessage);
 
+        // Ejecutar el asistente para la generación inicial
         $runId = self::createRun($threadId, getenv('SOF_REQ_ASSISTANT_ID'));
-
         self::checkCompleteStatus($threadId, $runId);
 
-        $content = self::getGeneratedConent($threadId);
+        // Solicitar al asistente que revise y corrija el contenido generado
+        $reviewMessage = "Revisa y corrige el contenido generado previamente. Asegúrate de que esté bien redactado, claro y consistente.";
+        self::createMessage($threadId, $reviewMessage);
 
-        return json_decode($content, true);
+        // Ejecutar el asistente para la validación/corrección
+        $reviewRunId = self::createRun($threadId, getenv('SOF_REQ_ASSISTANT_ID'));
+        self::checkCompleteStatus($threadId, $reviewRunId);
+
+        // Obtener el contenido final validado
+        $finalContent = self::getGeneratedConent($threadId);
+
+        return json_decode($finalContent, true);
     }
 }

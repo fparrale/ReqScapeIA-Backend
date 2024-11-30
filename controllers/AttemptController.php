@@ -4,10 +4,9 @@ require_once 'services/AttemptService.php';
 class AttemptController {
 
     public static function checkAttemptsRemaining($user_id) {
-        $data = json_decode(file_get_contents('php://input'), true);
-        $room_code = $data['room_code'] ?? null;
+        $courseId = $_GET['params'][0];
         
-        $availableAttempts = AttemptService::checkAttemptsRemaining($user_id, $room_code);
+        $availableAttempts = AttemptService::checkAttemptsRemaining($user_id, $courseId);
         http_response_code(200);
         echo json_encode($availableAttempts);
     }

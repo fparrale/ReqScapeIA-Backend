@@ -8,6 +8,9 @@ $user_id = $payload['id'];
 $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
+    case 'GET':
+        AttemptController::checkAttemptsRemaining($user_id);
+        break;
     case 'POST':
         AttemptController::registerAttempt($user_id);
         break;

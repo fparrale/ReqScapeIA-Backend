@@ -7,6 +7,9 @@ AuthMiddleware::validateToken();
 
 $method = $_SERVER['REQUEST_METHOD'];
 
-if ($method === 'POST') {
+if ($method === 'GET') {
     GameController::prepareGameContent();
+} else {
+    http_response_code(405);
+    echo json_encode(['message' => 'Método no permitido.']);
 }

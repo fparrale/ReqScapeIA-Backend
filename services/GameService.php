@@ -1,16 +1,16 @@
 <?php
-
 require_once 'config/Database.php';
 require_once 'services/RoomService.php';
+
 class GameService
 {
-    public static function prepareGameContent($roomCode)
+    public static function prepareGameContent($courseId)
     {
-        $room = RoomService::getByCode($roomCode);
+        $room = RoomService::getById($courseId);
 
         if ($room === null) {
             http_response_code(404);
-            echo json_encode(['message' => 'Sala no encontrada']);
+            echo json_encode(['message' => 'Curso no encontrado']);
             exit;
         }
 

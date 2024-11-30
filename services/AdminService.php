@@ -186,7 +186,7 @@ class AdminService
         $roomExists = RoomService::getById($courseId);
         if (!$roomExists) {
             http_response_code(404);
-            echo json_encode(['message' => 'Room not found']);
+            echo json_encode(['message' => 'Curso no encontrado']);
             exit;
         }
         return $roomExists;
@@ -197,7 +197,7 @@ class AdminService
         $isAdmin = UserService::isAdmin($adminEmail);
         if (!$isAdmin) {
             http_response_code(403);
-            echo json_encode(['message' => 'Forbidden']);
+            echo json_encode(['message' => 'Acceso denegado']);
             exit;
         }
         return $isAdmin;

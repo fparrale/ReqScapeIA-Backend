@@ -7,7 +7,7 @@ $email = $payload['email'];
 
 $method = $_SERVER['REQUEST_METHOD'];
 
-if ($method === 'POST') {
+if ($method === 'GET') {
     AdminStatsController::getGeneratedRequirementsByCourse($email);
 } else {
     http_response_code(405);

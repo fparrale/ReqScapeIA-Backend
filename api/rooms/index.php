@@ -16,4 +16,7 @@ switch ($method) {
     case 'POST':
         RoomController::createRoom($user_id, $email);
         break;
+    case 'DELETE':
+        RoomController::deleteRoom($user_id, $email);
+        break;
 }

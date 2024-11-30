@@ -8,15 +8,15 @@
   "tags": [
     {
       "name": "Auth",
-      "description": "Authentication endpoints"
+      "description": "Authentication endpoints."
     },
     {
       "name": "Rooms",
-      "description": "Room management endpoints"
+      "description": "Room management endpoints."
     },
     {
       "name": "Admin",
-      "description": "Admin endpoints"
+      "description": "Admin endpoints."
     }
   ],
   "components": {
@@ -50,28 +50,28 @@
         "properties": {
           "id": {
             "type": "integer",
-            "description": "Identificador único de la sala"
+            "description": "Identificador único de la sala."
           },
           "room_name": {
             "type": "string",
-            "description": "Nombre de la sala"
+            "description": "Nombre de la sala."
           },
           "room_code": {
             "type": "string",
-            "description": "Código único de la sala"
+            "description": "Código único de la sala."
           },
           "user_id": {
             "type": "integer",
-            "description": "ID del usuario creador de la sala"
+            "description": "ID del usuario creador de la sala."
           },
           "created_at": {
             "type": "string",
             "format": "date-time",
-            "description": "Fecha y hora de creación de la sala"
+            "description": "Fecha y hora de creación de la sala."
           },
           "max_attempts": {
             "type": "integer",
-            "description": "Número máximo de intentos permitidos"
+            "description": "Número máximo de intentos permitidos."
           }
         },
         "required": ["id", "room_name", "room_code", "user_id", "created_at", "max_attempts"]
@@ -109,26 +109,22 @@
   },
   "security": [{ "bearerAuth": [] }],
   "paths": {
-    "/admin/course-content": {
-      "post": {
+    "/admin/course-content/{id}": {
+      "get": {
         "tags": ["Admin"],
-        "summary": "Obtener el banco de requerimientos de un curso",
+        "summary": "Obtener el banco de requerimientos de un curso.",
         "description": "Obtiene el banco de requerimientos generados en la creación del curso a partir de su ID.",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "course_id": { "type": "integer" }
-                }
-              }
-            }
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "integer" }
           }
-        },
+        ],
         "responses": {
           "200": {
-            "description": "Banco de requerimientos obtenido exitosamente",
+            "description": "Banco de requerimientos obtenido exitosamente.",
             "content": {
               "application/json": {
                 "schema": {
@@ -141,26 +137,22 @@
         }
       }
     },
-    "/admin/course-stats": {
-      "post": {
+    "/admin/course-stats/{id}": {
+      "get": {
         "tags": ["Admin"],
-        "summary": "Obtener las estadisticas de un curso",
+        "summary": "Obtener las estadisticas de un curso.",
         "description": "Obtiene las estadisticas de un curso a partir de su ID.",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "course_id": { "type": "integer" }
-                }
-              }
-            }
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "integer" }
           }
-        },
+        ],
         "responses": {
           "200": {
-            "description": "Estadisticas del curso obtenidas exitosamente",
+            "description": "Estadisticas del curso obtenidas exitosamente.",
             "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CourseStats" } } }
           }
         }
@@ -170,7 +162,7 @@
       "post": {
         "security": [],
         "tags": ["Auth"],
-        "summary": "Login de usuario",
+        "summary": "Login de usuario.",
         "description": "Autentica a un usuario y devuelve un token.",
         "requestBody": {
           "content": {
@@ -192,7 +184,7 @@
         },
         "responses": {
           "200": {
-            "description": "Login exitoso",
+            "description": "Login exitoso.",
             "content": {
               "application/json": {
                 "schema": {
@@ -208,7 +200,7 @@
       "post": {
         "security": [],
         "tags": ["Auth"],
-        "summary": "Registro de usuario",
+        "summary": "Registro de usuario.",
         "description": "Registra un nuevo usuario en el sistema.",
         "requestBody": {
           "content": {
@@ -228,7 +220,7 @@
         },
         "responses": {
           "200": {
-            "description": "Registro exitoso",
+            "description": "Registro exitoso.",
             "content": {
               "application/json": {
                 "schema": {
@@ -243,11 +235,11 @@
     "/auth/refresh-token": {
       "get": {
         "tags": ["Auth"],
-        "summary": "Refrescar token de usuario",
+        "summary": "Refrescar token de usuario.",
         "description": "Refresca el token de usuario actual.",
         "responses": {
           "200": {
-            "description": "Token refrescado exitosamente",
+            "description": "Token refrescado exitosamente.",
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/AuthResponse" }
@@ -257,59 +249,13 @@
         }
       }
     },
-    "/assistant/generate-requirements": {
-      "get": {
-        "tags": ["Assistant"],
-        "summary": "Generar requerimientos",
-        "description": "Genera requerimientos para una sessión de juego.",
-        "responses": {
-          "200": {
-            "description": "Requerimientos generados exitosamente",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "requirements": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "no": {
-                            "type": "integer",
-                            "description": "Número identificador del requerimiento"
-                          },
-                          "text": {
-                            "type": "string",
-                            "description": "Texto del requerimiento"
-                          },
-                          "isValid": {
-                            "type": "boolean",
-                            "description": "Indica si el requerimiento está bien formulado"
-                          },
-                          "feedback": {
-                            "type": "string",
-                            "description": "Retroalimentación sobre la validez del requerimiento"
-                          }
-                        },
-                        "required": ["no", "text", "isValid", "feedback"]
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/rooms": {
       "get": {
         "tags": ["Rooms"],
-        "summary": "Obtener todas las salas creadas por el usuario autenticado",
+        "summary": "Obtener todas las salas creadas por el usuario autenticado.",
         "responses": {
           "200": {
-            "description": "Lista de salas creadas por el usuario autenticado",
+            "description": "Lista de salas creadas por el usuario autenticado.",
             "content": {
               "application/json": {
                 "schema": {
@@ -325,7 +271,7 @@
       },
       "post": {
         "tags": ["Rooms"],
-        "summary": "Crear una sala",
+        "summary": "Crear una sala.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -343,7 +289,7 @@
         },
         "responses": {
           "200": {
-            "description": "Sala creada exitosamente",
+            "description": "Sala creada exitosamente.",
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/Room" }
@@ -353,13 +299,37 @@
         }
       }
     },
+    "/rooms/{id}": {
+      "delete": {
+        "tags": ["Rooms"],
+        "summary": "Eliminar una sala.",
+        "description": "Elimina una sala a partir de su ID.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Identificador único de la sala."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sala eliminada exitosamente.",
+            "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" } } } } }
+          }
+        }
+      }
+    },
     "/rooms/enrolled": {
       "get": {
         "tags": ["Rooms"],
-        "summary": "Obtener todas las salas inscritas por el usuario autenticado",
+        "summary": "Obtener todas las salas inscritas por el usuario autenticado.",
         "responses": {
           "200": {
-            "description": "Lista de salas inscritas por el usuario autenticado",
+            "description": "Lista de salas inscritas por el usuario autenticado.",
             "content": {
               "application/json": {
                 "schema": {
@@ -377,7 +347,7 @@
     "/rooms/enroll": {
       "post": {
         "tags": ["Rooms"],
-        "summary": "Inscribirse en una sala",
+        "summary": "Inscribirse en una sala.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -393,7 +363,7 @@
         },
         "responses": {
           "200": {
-            "description": "Inscripción exitosa",
+            "description": "Inscripción exitosa.",
             "content": {
               "application/json": {
                 "schema": {
@@ -405,50 +375,22 @@
         }
       }
     },
-    "/rooms/remove": {
-      "post": {
-        "tags": ["Rooms"],
-        "summary": "Eliminar una sala",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": { "room_id": { "type": "integer" } },
-                "required": ["room_id"]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Sala eliminada exitosamente.",
-            "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" } } } } }
-          }
-        }
-      }
-    },
-    "/attempts/check": {
-      "post": {
+    "/attempts/{courseId}": {
+      "get": {
         "tags": ["Attempts"],
-        "summary": "Revisar la cantidad de intentos restantes",
-        "description": "Revisa la cantidad de intentos restantes para una sala a partir de su código",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "room_code": { "type": "string" }
-                },
-                "required": ["room_code"]
-              }
-            }
+        "summary": "Obtener todos los intentos de un usuario para un curso.",
+        "description": "Obtiene todos los intentos de un usuario para un curso a partir de su ID.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "courseId",
+            "required": true,
+            "schema": { "type": "integer" }
           }
-        },
+        ],
         "responses": {
           "200": {
-            "description": "Respuesta con el número de intentos restantes y el máximo permitido",
+            "description": "Respuesta con el número de intentos restantes y el máximo permitido.",
             "content": {
               "application/json": {
                 "schema": {
@@ -467,7 +409,7 @@
     "/attempts": {
       "post": {
         "tags": ["Attempts"],
-        "summary": "Registrar un intento de juego al iniciar una partida",
+        "summary": "Registrar un intento de juego al iniciar una partida.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -484,20 +426,20 @@
         },
         "responses": {
           "200": {
-            "description": "Intento registrado exitosamente",
+            "description": "Intento registrado exitosamente.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "id": { "type": "integer", "description": "Identificador único del intento" }
+                    "id": { "type": "integer", "description": "Identificador único del intento." }
                   }
                 }
               }
             }
           },
           "500": {
-            "description": "Error al registrar el intento",
+            "description": "Error al registrar el intento.",
             "content": {
               "application/json": {
                 "schema": { "type": "object", "properties": { "message": { "type": "string" } } }
@@ -528,7 +470,7 @@
         },
         "responses": {
           "200": {
-            "description": "Estadisticas y estado actualizados exitosamente",
+            "description": "Estadisticas y estado actualizados exitosamente.",
             "content": {
               "application/json": {
                 "schema": { "type": "object", "properties": { "message": { "type": "string" } } }
@@ -536,7 +478,7 @@
             }
           },
           "500": {
-            "description": "Error al actualizar las estadisticas y el estado del intento",
+            "description": "Error al actualizar las estadisticas y el estado del intento.",
             "content": {
               "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" } } } }
             }
@@ -544,22 +486,19 @@
         }
       }
     },
-    "/game/content": {
-      "post": {
+    "/game/content/{courseId}": {
+      "get": {
         "tags": ["Game"],
-        "summary": "Preparar el contenido del juego",
-        "description": "Prepara el contenido del juego para una sala a partir de su código",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": { "roomCode": { "type": "string" } },
-                "required": ["roomCode"]
-              }
-            }
+        "summary": "Preparar el contenido del juego.",
+        "description": "Prepara el contenido del juego para un curso a partir de su ID.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "courseId",
+            "required": true,
+            "schema": { "type": "integer" }
           }
-        },
+        ],
         "responses": {
           "200": {
             "description": "Contenido del juego preparado exitosamente.",
@@ -580,11 +519,11 @@
     "/student/history": {
       "get": {
         "tags": ["Student"],
-        "summary": "Obtener el historial de juegos de un estudiante",
+        "summary": "Obtener el historial de juegos de un estudiante.",
         "description": "Obtiene el historial de juegos de un estudiante a partir de su email.",
         "responses": {
           "200": {
-            "description": "Historial de juegos obtenido exitosamente",
+            "description": "Historial de juegos obtenido exitosamente.",
             "content": {
               "application/json": {
                 "schema": {
@@ -640,11 +579,11 @@
     "/seed": {
       "get": {
         "tags": ["Database"],
-        "summary": "Ejecutar seed inicial de desarrollo",
+        "summary": "Ejecutar seed inicial de desarrollo.",
         "security": [{"basicAuth": []}],
         "responses": {
           "200": {
-            "description": "Seed ejecutado con éxito",
+            "description": "Seed ejecutado con éxito.",
             "content": {
               "application/json": {
                 "schema": { "type": "object", "properties": { "message": { "type": "string" } } }

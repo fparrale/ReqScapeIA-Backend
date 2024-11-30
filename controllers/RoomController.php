@@ -49,17 +49,15 @@ class RoomController
 
         $roomEntity = new RoomEntity($room_name, $room_code, $items_per_attempt, $max_attempts);
         $gameConfigEntity = new GameConfigEntity($language, $additional_context);
-        $createdRoom = RoomService::create($roomEntity, $gameConfigEntity, $id);
 
-        if (!$createdRoom) {
+        try {
+            $createdRoom = RoomService::create($roomEntity, $gameConfigEntity, $id);
+            http_response_code(201);
+            echo json_encode($createdRoom);
+        } catch (Exception $e) {
             http_response_code(500);
-            echo json_encode(['message' => 'Error al crear la sala.']);
-            return;
+            echo json_encode(['message' => $e->getMessage()]);
         }
-
-        http_response_code(201);
-        echo json_encode($createdRoom);
-        return;
     }
 
     public static function getAllRooms($id, $email)
@@ -107,7 +105,7 @@ class RoomController
         echo json_encode(['message' => 'Inscripción exitosa.']);
     }
 
-    public static function deleteRoom($email)
+    public static function deleteRoom($id, $email)
     {
         $isAdmin = UserService::isAdmin($email);
 
@@ -117,8 +115,7 @@ class RoomController
             return;
         }
 
-        $data = json_decode(file_get_contents('php://input'), true);
-        $room_id = $data['room_id'] ?? null;
+        $room_id = explode('/', $_SERVER['REQUEST_URI'])[2] ?? null;
 
         if (!$room_id) {
             http_response_code(400);

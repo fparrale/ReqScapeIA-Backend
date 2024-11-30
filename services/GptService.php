@@ -69,28 +69,38 @@ class GptService
         return $response['id'];
     }
 
-    private static function checkCompleteStatus($threadId, $runId)
+    private static function checkCompleteStatus($threadId, $runId, $timeout = 60)
     {
-        $endpoint = self::$threadsEndpoint . '/' . $threadId . '/runs/' . $runId;
+        $startTime = time();
+        $completed = false;
 
-        $ch = self::prepareAPI($endpoint, 'GET', [
-            'OpenAI-Beta: assistants=v2',
-        ]);
-        $response = curl_exec($ch);
+        while (!$completed && (time() - $startTime) < $timeout) {
+            $endpoint = self::$threadsEndpoint . '/' . $threadId . '/runs/' . $runId;
 
-        if (curl_errno($ch)) {
-            throw new Exception('Error al verificar el estado de la ejecución: ' . curl_error($ch));
+            $ch = self::prepareAPI($endpoint, 'GET', [
+                'OpenAI-Beta: assistants=v2',
+            ]);
+            $response = curl_exec($ch);
+
+            if (curl_errno($ch)) {
+                throw new Exception('Error al verificar el estado de la ejecución: ' . curl_error($ch));
+            }
+
+            $response = json_decode($response, true);
+
+            if ($response['status'] === 'completed') {
+                $completed = true;
+            } else {
+                // Sleep for 1 second before checking again
+                sleep(1);
+            }
         }
 
-        $response = json_decode($response, true);
-
-        if ($response['status'] === 'completed') {
-            return $response['status'];
+        if (!$completed) {
+            throw new Exception('Timeout: La ejecución no se completó dentro del tiempo límite de ' . $timeout . ' segundos.');
         }
 
-        // Sleep for 1 second before checking again
-        sleep(1);
-        return self::checkCompleteStatus($threadId, $runId);
+        return $response['status'];
     }
 
     private static function createMessage($threadId, $content)

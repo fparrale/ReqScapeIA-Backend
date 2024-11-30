@@ -32,14 +32,19 @@ class AttemptService {
         echo json_encode(['id' => $attemptId]);
     }
 
-    public static function checkAttemptsRemaining($user_id, $room_code) {
-        $room = RoomService::getByCode($room_code);
-        $room_id = $room['id'];
+    public static function checkAttemptsRemaining($user_id, $courseId) {
+        $room = RoomService::getById($courseId);
+        
+        if (!$room) {
+            http_response_code(404);
+            echo json_encode(['message' => 'Curso no encontrado.']);
+            return;
+        }
 
         $query = "SELECT COUNT(*) FROM attempts WHERE user_id = :user_id AND room_id = :room_id";
         $stmt = Database::getConn()->prepare($query);
         $stmt->bindParam(':user_id', $user_id);
-        $stmt->bindParam(':room_id', $room_id);
+        $stmt->bindParam(':room_id', $room['id']);
         $stmt->execute();
         $attempts = $stmt->fetchColumn();
         return [

@@ -1,19 +1,20 @@
 <?php
-// Configuración de la API
 require_once 'config/ApiConfig.php';
 ApiConfig::cors();
 ApiConfig::json();
 
-// Cargar variables de entorno
 require_once 'config/Environment.php';
 Environment::loadEnv(__DIR__ . '/.env');
 
 $uri = trim($_SERVER['REQUEST_URI'], '/');
 $method = $_SERVER['REQUEST_METHOD'];
 
-// Define route patterns and corresponding file paths
 $routes = [
-    // 'rooms/(\d+)' => 'api/rooms.php', // Example pattern for /rooms/:id
+    'rooms/(\d+)' => 'api/rooms/index.php',
+    'admin/course-content/(\d+)' => 'api/admin/course-content.php',
+    'admin/course-stats/(\d+)' => 'api/admin/course-stats.php',
+    'attempts/(\d+)' => 'api/attempts/index.php',
+    'game/content/(\d+)' => 'api/game/content.php',
 ];
 
 $matched = false;
@@ -21,8 +22,8 @@ $matched = false;
 foreach ($routes as $pattern => $filePath) {
     if (preg_match("#^$pattern$#", $uri, $matches)) {
         $matched = true;
-        array_shift($matches); // Remove the full match
-        $_GET['params'] = $matches; // Store parameters in $_GET['params']
+        array_shift($matches);
+        $_GET['params'] = $matches;
         require $filePath;
         break;
     }

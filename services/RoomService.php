@@ -10,27 +10,33 @@ class RoomService
 
     public static function create(RoomEntity $room, GameConfigEntity $gameConfig, $user_id)
     {
-        $query = "INSERT INTO rooms (room_name, room_code, items_per_attempt, max_attempts, user_id) VALUES (:room_name, :room_code, :items_per_attempt, :max_attempts, :user_id)";
-        $stmt = Database::getConn()->prepare($query);
-        $stmt->bindParam(':room_name', $room->room_name);
-        $stmt->bindParam(':room_code', $room->room_code);
-        $stmt->bindParam(':items_per_attempt', $room->items_per_attempt);
-        $stmt->bindParam(':max_attempts', $room->max_attempts);
-        $stmt->bindParam(':user_id', $user_id);
+        try {
+            Database::getConn()->beginTransaction();
 
-        $roomId = null;
-        if ($stmt->execute()) {
+            $query = "INSERT INTO rooms (room_name, room_code, items_per_attempt, max_attempts, user_id) VALUES (:room_name, :room_code, :items_per_attempt, :max_attempts, :user_id)";
+            $stmt = Database::getConn()->prepare($query);
+            $stmt->bindParam(':room_name', $room->room_name);
+            $stmt->bindParam(':room_code', $room->room_code);
+            $stmt->bindParam(':items_per_attempt', $room->items_per_attempt);
+            $stmt->bindParam(':max_attempts', $room->max_attempts);
+            $stmt->bindParam(':user_id', $user_id);
+
+            if (!$stmt->execute()) {
+                throw new Exception("Error al crear el curso en la base de datos.");
+            }
+
             $roomId = Database::getConn()->lastInsertId();
-            $createdRoom = self::getById($roomId);
-        } else {
-            return null;
+
+            $response = GptService::generateRequirements($gameConfig);
+            self::saveRequirements($roomId, $response['requirements']);
+
+            Database::getConn()->commit();
+
+            return self::getById($roomId);
+        } catch (Exception $e) {
+            Database::getConn()->rollBack();
+            throw new Exception($e->getMessage());
         }
-
-        $response = GptService::generateRequirements($gameConfig);
-
-        self::saveRequirements($roomId, $response['requirements']);
-
-        return $createdRoom;
     }
 
     public static function getAllByUserId($user_id)
@@ -101,6 +107,8 @@ class RoomService
 
     public static function remove($id)
     {
+        self::checkIfCourseExists($id);
+        
         $query = "DELETE FROM rooms WHERE id = :id";
         $stmt = Database::getConn()->prepare($query);
         $stmt->bindParam(':id', $id);
@@ -135,5 +143,16 @@ class RoomService
             }
         }
         return true;
+    }
+
+    private static function checkIfCourseExists($courseId)
+    {
+        $courseExists = RoomService::getById($courseId);
+        if (!$courseExists) {
+            http_response_code(404);
+            echo json_encode(['message' => 'Curso no encontrado']);
+            exit;
+        }
+        return $courseExists;
     }
 }

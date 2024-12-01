@@ -1,8 +1,9 @@
 <?php
 require_once 'entities/UserEntity.php';
 require_once 'entities/GameConfigEntity.php';
+require_once 'entities/CourseEntity.php';
 require_once 'services/UserService.php';
-require_once 'services/RoomService.php';
+require_once 'services/CourseService.php';
 
 class SeedService
 {
@@ -12,12 +13,12 @@ class SeedService
 
         $adminId = $this->createAdminUser();
         $this->createStudents();
-        $this->createRooms($adminId);
+        $this->createCourses($adminId);
     }
 
     private function cleanDatabase()
     {
-        RoomService::deleteAll();
+        CourseService::deleteAll();
         UserService::deleteAll();
     }
 
@@ -66,24 +67,24 @@ class SeedService
         }
     }
 
-    private function createRooms($adminId)
+    private function createCourses($adminId)
     {
-        $rooms = [
+        $courses = [
             [
-                'room_code' => 'SOF-S-MA-1-1',
-                'room_name' => 'Ingeniería de Requerimientos',
+                'course_code' => 'SOF-S-MA-1-1',
+                'course_name' => 'Ingeniería de Requerimientos',
                 'items_per_attempt' => 5,
                 'max_attempts' => 3,
             ],
         ];
 
-        foreach ($rooms as $room) {
-            RoomService::create(
-                new RoomEntity(
-                    $room['room_name'],
-                    $room['room_code'],
-                    $room['items_per_attempt'],
-                    $room['max_attempts'],
+        foreach ($courses as $course) {
+            CourseService::create(
+                new CourseEntity(
+                    $course['course_name'],
+                    $course['course_code'],
+                    $course['items_per_attempt'],
+                    $course['max_attempts'],
                 ),
                 new GameConfigEntity('es', 'Aplicación de gestión del tiempo.'),
                 $adminId

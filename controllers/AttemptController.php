@@ -13,10 +13,10 @@ class AttemptController {
 
     public static function registerAttempt($user_id) {
         $data = json_decode(file_get_contents('php://input'), true);
-        $room_code = $data['room_code'] ?? null;
+        $courseId = $data['course_id'] ?? null;
         $totalreq = $data['totalreq'] ?? null;
 
-        AttemptService::registerAttempt($user_id, $room_code, $totalreq);
+        AttemptService::registerAttempt($user_id, $courseId, $totalreq);
     }
 
     public static function updateStatsAndStatus($user_id) {

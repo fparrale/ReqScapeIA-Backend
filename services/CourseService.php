@@ -1,38 +1,38 @@
 <?php
 
-require_once 'entities/RoomEntity.php';
+require_once 'entities/CourseEntity.php';
 require_once 'entities/GameConfigEntity.php';
 require_once 'config/Database.php';
 require_once 'services/GptService.php';
 
-class RoomService
+class CourseService
 {
 
-    public static function create(RoomEntity $room, GameConfigEntity $gameConfig, $user_id)
+    public static function create(CourseEntity $course, GameConfigEntity $gameConfig, $user_id)
     {
         try {
             Database::getConn()->beginTransaction();
 
-            $query = "INSERT INTO rooms (room_name, room_code, items_per_attempt, max_attempts, user_id) VALUES (:room_name, :room_code, :items_per_attempt, :max_attempts, :user_id)";
+            $query = "INSERT INTO courses (course_name, course_code, items_per_attempt, max_attempts, user_id) VALUES (:course_name, :course_code, :items_per_attempt, :max_attempts, :user_id)";
             $stmt = Database::getConn()->prepare($query);
-            $stmt->bindParam(':room_name', $room->room_name);
-            $stmt->bindParam(':room_code', $room->room_code);
-            $stmt->bindParam(':items_per_attempt', $room->items_per_attempt);
-            $stmt->bindParam(':max_attempts', $room->max_attempts);
+            $stmt->bindParam(':course_name', $course->course_name);
+            $stmt->bindParam(':course_code', $course->course_code);
+            $stmt->bindParam(':items_per_attempt', $course->items_per_attempt);
+            $stmt->bindParam(':max_attempts', $course->max_attempts);
             $stmt->bindParam(':user_id', $user_id);
 
             if (!$stmt->execute()) {
                 throw new Exception("Error al crear el curso en la base de datos.");
             }
 
-            $roomId = Database::getConn()->lastInsertId();
+            $courseId = Database::getConn()->lastInsertId();
 
             $response = GptService::generateRequirements($gameConfig);
-            self::saveRequirements($roomId, $response['requirements']);
+            self::saveRequirements($courseId, $response['requirements']);
 
             Database::getConn()->commit();
 
-            return self::getById($roomId);
+            return self::getById($courseId);
         } catch (Exception $e) {
             Database::getConn()->rollBack();
             throw new Exception($e->getMessage());
@@ -41,7 +41,7 @@ class RoomService
 
     public static function getAllByUserId($user_id)
     {
-        $query = "SELECT * FROM rooms WHERE user_id = :user_id";
+        $query = "SELECT * FROM courses WHERE user_id = :user_id";
         $stmt = Database::getConn()->prepare($query);
         $stmt->bindParam(':user_id', $user_id);
         $stmt->execute();
@@ -51,14 +51,14 @@ class RoomService
 
     public static function getAllEnrolledByUserId($user_id)
     {
-        $query = "SELECT rooms.id, rooms.room_name, rooms.room_code, rooms.created_at, rooms.max_attempts,
-        rooms.user_id AS teacher_id,
+        $query = "SELECT courses.id, courses.course_name, courses.course_code, courses.created_at, courses.max_attempts,
+        courses.user_id AS teacher_id,
         users.email AS teacher_email, 
         CONCAT(users.first_name, ' ', users.last_name) AS teacher_name
-                 FROM enrolled_rooms 
-                 JOIN rooms ON enrolled_rooms.room_id = rooms.id
-                 JOIN users ON rooms.user_id = users.id
-                 WHERE enrolled_rooms.user_id = :user_id";
+                 FROM enrolled_courses 
+                 JOIN courses ON enrolled_courses.course_id = courses.id
+                 JOIN users ON courses.user_id = users.id
+                 WHERE enrolled_courses.user_id = :user_id";
         $stmt = Database::getConn()->prepare($query);
         $stmt->bindParam(':user_id', $user_id);
         $stmt->execute();
@@ -66,12 +66,12 @@ class RoomService
         return $result;
     }
 
-    public static function enroll($user_id, $room_id)
+    public static function enroll($user_id, $courseId)
     {
-        $query = "INSERT INTO enrolled_rooms (user_id, room_id) VALUES (:user_id, :room_id)";
+        $query = "INSERT INTO enrolled_courses (user_id, course_id) VALUES (:user_id, :course_id)";
         $stmt = Database::getConn()->prepare($query);
         $stmt->bindParam(':user_id', $user_id);
-        $stmt->bindParam(':room_id', $room_id);
+        $stmt->bindParam(':course_id', $courseId);
         if ($stmt->execute()) {
             return true;
         } else {
@@ -79,11 +79,11 @@ class RoomService
         }
     }
 
-    public static function getByCode($room_code)
+    public static function getByCode($course_code)
     {
-        $query = "SELECT * FROM rooms WHERE room_code = :room_code";
+        $query = "SELECT * FROM courses WHERE course_code = :course_code";
         $stmt = Database::getConn()->prepare($query);
-        $stmt->bindParam(':room_code', $room_code);
+        $stmt->bindParam(':course_code', $course_code);
         $stmt->execute();
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         if (empty($result)) {
@@ -94,7 +94,7 @@ class RoomService
 
     public static function getById($id)
     {
-        $query = "SELECT * FROM rooms WHERE id = :id";
+        $query = "SELECT * FROM courses WHERE id = :id";
         $stmt = Database::getConn()->prepare($query);
         $stmt->bindParam(':id', $id);
         $stmt->execute();
@@ -109,7 +109,7 @@ class RoomService
     {
         self::checkIfCourseExists($id);
         
-        $query = "DELETE FROM rooms WHERE id = :id";
+        $query = "DELETE FROM courses WHERE id = :id";
         $stmt = Database::getConn()->prepare($query);
         $stmt->bindParam(':id', $id);
         if ($stmt->execute()) {
@@ -121,22 +121,22 @@ class RoomService
 
     public static function deleteAll()
     {
-        $query = "DELETE FROM rooms";
+        $query = "DELETE FROM courses";
         $stmt = Database::getConn()->prepare($query);
         $stmt->execute();
     }
 
-    public static function saveRequirements($room_id, $requirements)
+    public static function saveRequirements($courseId, $requirements)
     {
         foreach ($requirements as $requirement) {
-            $query = "INSERT INTO requirements (requirementText, isValid, feedbackText, room_id) VALUES (:requirementText, :isValid, :feedbackText, :room_id)";
+            $query = "INSERT INTO requirements (requirementText, isValid, feedbackText, course_id) VALUES (:requirementText, :isValid, :feedbackText, :course_id)";
             $stmt = Database::getConn()->prepare($query);
             $requirementText = htmlspecialchars($requirement['text']);
             $feedbackText = htmlspecialchars($requirement['feedback']);
             $stmt->bindParam(':requirementText', $requirementText);
             $stmt->bindParam(':isValid', $requirement['isValid'], PDO::PARAM_INT);
             $stmt->bindParam(':feedbackText', $feedbackText);
-            $stmt->bindParam(':room_id', $room_id);
+            $stmt->bindParam(':course_id', $courseId);
 
             if (!$stmt->execute()) {
                 return false;
@@ -147,7 +147,7 @@ class RoomService
 
     private static function checkIfCourseExists($courseId)
     {
-        $courseExists = RoomService::getById($courseId);
+        $courseExists = CourseService::getById($courseId);
         if (!$courseExists) {
             http_response_code(404);
             echo json_encode(['message' => 'Curso no encontrado']);

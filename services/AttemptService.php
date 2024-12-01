@@ -1,24 +1,29 @@
 <?php
 require_once 'config/Database.php';
-require_once 'services/RoomService.php';
+require_once 'services/CourseService.php';
 class AttemptService {
 
-    public static function registerAttempt($user_id, $room_code, $totalreq) {
+    public static function registerAttempt($user_id, $courseId, $totalreq) {
 
-        $room = RoomService::getByCode($room_code);
-        $room_id = $room['id'];
+        $course = CourseService::getById($courseId);
 
-        $hasAttemptsRemaining = self::checkAttemptsRemaining($user_id, $room_code);
+        if (!$course) {
+            http_response_code(404);
+            echo json_encode(['message' => 'Curso no encontrado.']);
+            return;
+        }
+
+        $hasAttemptsRemaining = self::checkAttemptsRemaining($user_id, $courseId);
         if (!$hasAttemptsRemaining['remaining']) {
             http_response_code(400);
             echo json_encode(['message' => 'No tienes más intentos disponibles para esta sala.']);
             return;
         }
 
-        $query = "INSERT INTO attempts (user_id, room_id, totalreq) VALUES (:user_id, :room_id, :totalreq)";
+        $query = "INSERT INTO attempts (user_id, course_id, totalreq) VALUES (:user_id, :course_id, :totalreq)";
         $stmt = Database::getConn()->prepare($query);
         $stmt->bindParam(':user_id', $user_id);
-        $stmt->bindParam(':room_id', $room_id);
+        $stmt->bindParam(':course_id', $course['id']);
         $stmt->bindParam(':totalreq', $totalreq);
 
         if (!$stmt->execute()) {
@@ -33,23 +38,23 @@ class AttemptService {
     }
 
     public static function checkAttemptsRemaining($user_id, $courseId) {
-        $room = RoomService::getById($courseId);
+        $course = CourseService::getById($courseId);
         
-        if (!$room) {
+        if (!$course) {
             http_response_code(404);
             echo json_encode(['message' => 'Curso no encontrado.']);
             return;
         }
 
-        $query = "SELECT COUNT(*) FROM attempts WHERE user_id = :user_id AND room_id = :room_id";
+        $query = "SELECT COUNT(*) FROM attempts WHERE user_id = :user_id AND course_id = :course_id";
         $stmt = Database::getConn()->prepare($query);
         $stmt->bindParam(':user_id', $user_id);
-        $stmt->bindParam(':room_id', $room['id']);
+        $stmt->bindParam(':course_id', $course['id']);
         $stmt->execute();
         $attempts = $stmt->fetchColumn();
         return [
-            'remaining' => $room['max_attempts'] - $attempts,
-            'max_attempts' => $room['max_attempts']
+            'remaining' => $course['max_attempts'] - $attempts,
+            'max_attempts' => $course['max_attempts']
         ];
     }
 

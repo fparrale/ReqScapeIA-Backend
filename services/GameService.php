@@ -1,24 +1,24 @@
 <?php
 require_once 'config/Database.php';
-require_once 'services/RoomService.php';
+require_once 'services/CourseService.php';
 
 class GameService
 {
     public static function prepareGameContent($courseId)
     {
-        $room = RoomService::getById($courseId);
+        $course = CourseService::getById($courseId);
 
-        if ($room === null) {
+        if ($course === null) {
             http_response_code(404);
             echo json_encode(['message' => 'Curso no encontrado']);
             exit;
         }
 
-        $items_per_attempt = $room['items_per_attempt'];
+        $items_per_attempt = $course['items_per_attempt'];
 
-        $sql = "SELECT * FROM requirements WHERE room_id = :room_id ORDER BY RAND() LIMIT $items_per_attempt";
+        $sql = "SELECT * FROM requirements WHERE course_id = :course_id ORDER BY RAND() LIMIT $items_per_attempt";
         $stmt = Database::getConn()->prepare($sql);
-        $stmt->bindParam(':room_id', $room['id']);
+        $stmt->bindParam(':course_id', $course['id']);
         $stmt->execute();
         $requirements = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

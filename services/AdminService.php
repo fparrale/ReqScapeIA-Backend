@@ -1,7 +1,7 @@
 <?php
 
 require_once 'services/UserService.php';
-require_once 'services/RoomService.php';
+require_once 'services/CourseService.php';
 require_once 'services/AttemptService.php';
 require_once 'config/Database.php';
 
@@ -10,7 +10,7 @@ class AdminService
     public static function getStatsByCourse($adminEmail, $courseId)
     {
         self::checkIfAdmin($adminEmail);
-        self::checkIfRoomExists($courseId);
+        self::checkIfCourseExists($courseId);
 
         $scoreAverage = self::getScoreAverageByCourse($courseId);
         $timeAverage = self::getTimeAverageByCourse($courseId);
@@ -34,12 +34,12 @@ class AdminService
         $query = "SELECT 
             AVG(a.score) AS avg_score
         FROM 
-            rooms r
+            courses c
         JOIN 
-            attempts a ON r.id = a.room_id
+            attempts a ON c.id = a.course_id
         WHERE 
             a.status = 'completed'
-            AND r.id = :course_id
+            AND c.id = :course_id
         ";
 
         $stmt = Database::getConn()->prepare($query);
@@ -56,12 +56,12 @@ class AdminService
         $query = "SELECT 
             AVG(a.time) AS avg_time_seconds
         FROM 
-            rooms r
+            courses c
         JOIN 
-            attempts a ON r.id = a.room_id
+            attempts a ON c.id = a.course_id
         WHERE 
             a.status = 'completed'
-            AND r.id = :course_id
+            AND c.id = :course_id
         ";
 
         $stmt = Database::getConn()->prepare($query);
@@ -78,11 +78,11 @@ class AdminService
         $query = "SELECT 
             (SUM(CASE WHEN a.status = 'abandoned' THEN 1 ELSE 0 END) * 100.0 / COUNT(a.id)) AS abandonment_rate
         FROM 
-            rooms r
+            courses c
         JOIN 
-            attempts a ON r.id = a.room_id
+            attempts a ON c.id = a.course_id
         WHERE
-            r.id = :course_id
+            c.id = :course_id
         ";
 
         $stmt = Database::getConn()->prepare($query);
@@ -119,7 +119,7 @@ class AdminService
                     WHEN a.score = 1.0 THEN 9 -- Puntajes perfectos (100%) asignados al rango 9-10
                     ELSE FLOOR(a.score * 10) 
                 END) = r.range_start
-            AND a.room_id = :course_id
+            AND a.course_id = :course_id
             AND a.status = 'completed'
         GROUP BY 
             r.range_start
@@ -140,11 +140,11 @@ class AdminService
         $query = "SELECT 
             COUNT(a.id) AS total_attempts
         FROM 
-            rooms r
+            courses c
         JOIN 
-            attempts a ON r.id = a.room_id
+            attempts a ON c.id = a.course_id
         WHERE 
-            r.id = :course_id";
+            c.id = :course_id";
 
         $stmt = Database::getConn()->prepare($query);
         $stmt->bindParam(':course_id', $courseId);
@@ -156,9 +156,9 @@ class AdminService
     public static function getGeneratedRequirementsByCourse($adminEmail, $courseId)
     {
         self::checkIfAdmin($adminEmail);
-        self::checkIfRoomExists($courseId);
+        self::checkIfCourseExists($courseId);
 
-        $query = "SELECT * FROM requirements WHERE room_id = :course_id";
+        $query = "SELECT * FROM requirements WHERE course_id = :course_id";
 
         $stmt = Database::getConn()->prepare($query);
         $stmt->bindParam(':course_id', $courseId);
@@ -181,15 +181,15 @@ class AdminService
         return $formattedRequirements;
     }
 
-    private static function checkIfRoomExists($courseId)
+    private static function checkIfCourseExists($courseId)
     {
-        $roomExists = RoomService::getById($courseId);
-        if (!$roomExists) {
+        $courseExists = CourseService::getById($courseId);
+        if (!$courseExists) {
             http_response_code(404);
             echo json_encode(['message' => 'Curso no encontrado']);
             exit;
         }
-        return $roomExists;
+        return $courseExists;
     }
 
     private static function checkIfAdmin($adminEmail)

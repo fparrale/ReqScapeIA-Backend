@@ -10,7 +10,7 @@ $uri = trim($_SERVER['REQUEST_URI'], '/');
 $method = $_SERVER['REQUEST_METHOD'];
 
 $routes = [
-    'rooms/(\d+)' => 'api/rooms/index.php',
+    'courses/(\d+)' => 'api/courses/index.php',
     'admin/course-content/(\d+)' => 'api/admin/course-content.php',
     'admin/course-stats/(\d+)' => 'api/admin/course-stats.php',
     'attempts/(\d+)' => 'api/attempts/index.php',

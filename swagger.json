@@ -8,15 +8,15 @@
   "tags": [
     {
       "name": "Auth",
-      "description": "Authentication endpoints."
+      "description": "Autenticación de usuarios."
     },
     {
-      "name": "Rooms",
-      "description": "Room management endpoints."
+      "name": "Course",
+      "description": "Gestión de cursos."
     },
     {
       "name": "Admin",
-      "description": "Admin endpoints."
+      "description": "Configuración de cursos."
     }
   ],
   "components": {
@@ -45,36 +45,36 @@
           }
         }
       },
-      "Room": {
+      "Course": {
         "type": "object",
         "properties": {
           "id": {
             "type": "integer",
-            "description": "Identificador único de la sala."
+            "description": "Identificador único del curso."
           },
-          "room_name": {
+          "course_name": {
             "type": "string",
-            "description": "Nombre de la sala."
+            "description": "Nombre del curso."
           },
-          "room_code": {
+          "course_code": {
             "type": "string",
-            "description": "Código único de la sala."
+            "description": "Código único del curso."
           },
           "user_id": {
             "type": "integer",
-            "description": "ID del usuario creador de la sala."
+            "description": "ID del usuario creador del curso."
           },
           "created_at": {
             "type": "string",
             "format": "date-time",
-            "description": "Fecha y hora de creación de la sala."
+            "description": "Fecha y hora de creación del curso."
           },
           "max_attempts": {
             "type": "integer",
             "description": "Número máximo de intentos permitidos."
           }
         },
-        "required": ["id", "room_name", "room_code", "user_id", "created_at", "max_attempts"]
+        "required": ["id", "course_name", "course_code", "user_id", "created_at", "max_attempts"]
       },
       "Requirement": {
         "type": "object",
@@ -249,19 +249,19 @@
         }
       }
     },
-    "/rooms": {
+    "/courses": {
       "get": {
-        "tags": ["Rooms"],
-        "summary": "Obtener todas las salas creadas por el usuario autenticado.",
+        "tags": ["Course"],
+        "summary": "Obtener todos los cursos creados por el usuario autenticado.",
         "responses": {
           "200": {
-            "description": "Lista de salas creadas por el usuario autenticado.",
+            "description": "Lista de cursos creados por el usuario autenticado.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Room"
+                    "$ref": "#/components/schemas/Course"
                   }
                 }
               }
@@ -270,40 +270,43 @@
         }
       },
       "post": {
-        "tags": ["Rooms"],
-        "summary": "Crear una sala.",
+        "tags": ["Course"],
+        "summary": "Crear un curso.",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
-                  "room_code": { "type": "string" },
-                  "room_name": { "type": "string" },
-                  "max_attempts": { "type": "integer" }
+                  "course_code": { "type": "string" },
+                  "course_name": { "type": "string" },
+                  "max_attempts": { "type": "integer" },
+                  "items_per_attempt": { "type": "integer" },
+                  "language": { "type": "string" },
+                  "additional_context": { "type": "string" }
                 },
-                "required": ["room_code", "room_name", "max_attempts"]
+                "required": ["course_code", "course_name", "max_attempts"]
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Sala creada exitosamente.",
+            "description": "Curso creado exitosamente.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Room" }
+                "schema": { "$ref": "#/components/schemas/Course" }
               }
             }
           }
         }
       }
     },
-    "/rooms/{id}": {
+    "/courses/{id}": {
       "delete": {
-        "tags": ["Rooms"],
-        "summary": "Eliminar una sala.",
-        "description": "Elimina una sala a partir de su ID.",
+        "tags": ["Course"],
+        "summary": "Eliminar un curso.",
+        "description": "Elimina un curso a partir de su ID.",
         "parameters": [
           {
             "in": "path",
@@ -312,30 +315,30 @@
             "schema": {
               "type": "integer"
             },
-            "description": "Identificador único de la sala."
+            "description": "Identificador único del curso."
           }
         ],
         "responses": {
           "200": {
-            "description": "Sala eliminada exitosamente.",
+            "description": "Curso eliminado exitosamente.",
             "content": { "application/json": { "schema": { "type": "object", "properties": { "message": { "type": "string" } } } } }
           }
         }
       }
     },
-    "/rooms/enrolled": {
+    "/courses/enrolled": {
       "get": {
-        "tags": ["Rooms"],
-        "summary": "Obtener todas las salas inscritas por el usuario autenticado.",
+        "tags": ["Course"],
+        "summary": "Obtener todos los cursos inscritos por el usuario autenticado.",
         "responses": {
           "200": {
-            "description": "Lista de salas inscritas por el usuario autenticado.",
+            "description": "Lista de cursos inscritos por el usuario autenticado.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Room"
+                    "$ref": "#/components/schemas/Course"
                   }
                 }
               }
@@ -344,19 +347,19 @@
         }
       }
     },
-    "/rooms/enroll": {
+    "/courses/enroll": {
       "post": {
-        "tags": ["Rooms"],
-        "summary": "Inscribirse en una sala.",
+        "tags": ["Course"],
+        "summary": "Inscribirse en un curso.",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
-                  "room_code": { "type": "string" }
+                  "course_code": { "type": "string" }
                 },
-                "required": ["room_code"]
+                "required": ["course_code"]
               }
             }
           }
@@ -367,7 +370,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Room"
+                  "$ref": "#/components/schemas/Course"
                 }
               }
             }
@@ -416,10 +419,10 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "room_code": { "type": "string" },
+                  "course_id": { "type": "integer" },
                   "totalreq": { "type": "integer" }
                 },
-                "required": ["room_code", "totalreq"]
+                "required": ["course_id", "totalreq"]
               }
             }
           }
@@ -537,7 +540,7 @@
                       "user_id": {
                         "type": "integer"
                       },
-                      "room_id": {
+                      "course_id": {
                         "type": "integer"
                       },
                       "totalreq": {
@@ -558,10 +561,10 @@
                       "created_at": {
                         "type": "string"
                       },
-                      "room_name": {
+                      "course_name": {
                         "type": "string"
                       },
-                      "room_code": {
+                      "course_code": {
                         "type": "string"
                       },
                       "max_attempts": {

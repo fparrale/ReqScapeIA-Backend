@@ -9,10 +9,10 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS rooms (
+CREATE TABLE IF NOT EXISTS courses (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  room_name VARCHAR(50) NOT NULL,
-  room_code VARCHAR(255) NOT NULL UNIQUE,
+  course_name VARCHAR(50) NOT NULL, 
+  course_code VARCHAR(255) NOT NULL UNIQUE,
   user_id INT NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   max_attempts INT NOT NULL DEFAULT -1 COMMENT '-1 to indicate unlimited',
@@ -21,19 +21,19 @@ CREATE TABLE IF NOT EXISTS rooms (
     ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS enrolled_rooms (
+CREATE TABLE IF NOT EXISTS enrolled_courses (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,
-  room_id INT NOT NULL,
+  course_id INT NOT NULL,
   FOREIGN KEY (user_id) REFERENCES users(id),
-  FOREIGN KEY (room_id) REFERENCES rooms(id)
+  FOREIGN KEY (course_id) REFERENCES courses(id)
     ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS attempts (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,
-  room_id INT NOT NULL,
+  course_id INT NOT NULL,
   totalreq INT NOT NULL,
   movements INT NOT NULL DEFAULT 0,
   score FLOAT NOT NULL DEFAULT 0,
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS attempts (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id)
     ON DELETE CASCADE,
-  FOREIGN KEY (room_id) REFERENCES rooms(id)
+  FOREIGN KEY (course_id) REFERENCES courses(id)
     ON DELETE CASCADE
 );
 
@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS requirements (
     requirementText TEXT,
     isValid BOOLEAN DEFAULT FALSE,
     feedbackText TEXT,
-    room_id INT NOT NULL,
-    FOREIGN KEY (room_id) REFERENCES rooms(id)
+    course_id INT NOT NULL,
+    FOREIGN KEY (course_id) REFERENCES courses(id)
     ON DELETE CASCADE
 )

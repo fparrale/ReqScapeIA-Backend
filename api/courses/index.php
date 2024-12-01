@@ -1,6 +1,6 @@
 <?php
 require_once 'middleware/AuthMiddleware.php';
-require_once 'controllers/RoomController.php';
+require_once 'controllers/CourseController.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -10,13 +10,13 @@ $user_id = $payload['id'];
 $email = $payload['email'];
 
 switch ($method) {
-    case 'GET': 
-        RoomController::getAllRooms($user_id, $email);
+    case 'GET':
+        CourseController::getAllCourses($user_id, $email);
         break;
     case 'POST':
-        RoomController::createRoom($user_id, $email);
+        CourseController::createCourse($user_id, $email);
         break;
     case 'DELETE':
-        RoomController::deleteRoom($user_id, $email);
+        CourseController::deleteCourse($user_id, $email);
         break;
 }

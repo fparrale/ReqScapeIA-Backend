@@ -3,6 +3,7 @@
 require_once 'services/UserService.php';
 require_once 'services/CourseService.php';
 require_once 'services/AttemptService.php';
+require_once 'entities/RequirementEntity.php';
 require_once 'config/Database.php';
 
 class AdminService
@@ -167,11 +168,10 @@ class AdminService
         $requirements = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         $formattedRequirements = [];
-        $no = 1;
 
         foreach ($requirements as $requirement) {
             $formattedRequirements[] = [
-                'no' => $no++,
+                'id' => $requirement['id'],
                 'text' => $requirement['requirementText'],
                 'isValid' => $requirement['isValid'] == 1 ? true : false,
                 'feedback' => $requirement['feedbackText'],
@@ -179,6 +179,28 @@ class AdminService
         }
 
         return $formattedRequirements;
+    }
+
+    public static function editRequirement($adminEmail, RequirementEntity $requirement)
+    {
+        self::checkIfAdmin($adminEmail);
+        self::checkIfRequirementExists($requirement->id);
+        
+        $query = "UPDATE requirements SET requirementText = :requirementText, isValid = :isValid, feedbackText = :feedbackText WHERE id = :requirement_id";
+
+        $stmt = Database::getConn()->prepare($query);
+        $stmt->bindParam(':requirement_id', $requirement->id);
+        $stmt->bindParam(':requirementText', $requirement->text);
+        $stmt->bindParam(':isValid', $requirement->isValid, PDO::PARAM_INT);
+        $stmt->bindParam(':feedbackText', $requirement->feedback);
+
+        if (!$stmt->execute()) {
+            http_response_code(500);
+            echo json_encode(['message' => 'Error al editar el requisito']);
+            exit;
+        }
+
+        return true;
     }
 
     private static function checkIfCourseExists($courseId)
@@ -190,6 +212,24 @@ class AdminService
             exit;
         }
         return $courseExists;
+    }
+
+    private static function checkIfRequirementExists($requirementId)
+    {
+        $query = "SELECT * FROM requirements WHERE id = :requirement_id";
+        $stmt = Database::getConn()->prepare($query);
+        $stmt->bindParam(':requirement_id', $requirementId);
+        $stmt->execute();
+
+        $requirementExists = $stmt->fetchColumn();
+
+        if (!$requirementExists) {
+            http_response_code(404);
+            echo json_encode(['message' => 'Requisito no encontrado']);
+            exit;
+        }
+
+        return $requirementExists;
     }
 
     private static function checkIfAdmin($adminEmail)

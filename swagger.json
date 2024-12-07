@@ -79,7 +79,7 @@
       "Requirement": {
         "type": "object",
         "properties": {
-          "no": { "type": "integer" },
+          "id": { "type": "integer" },
           "text": { "type": "string" },
           "isValid": { "type": "boolean" },
           "feedback": { "type": "string" }
@@ -155,6 +155,29 @@
             "description": "Estadisticas del curso obtenidas exitosamente.",
             "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CourseStats" } } }
           }
+        }
+      }
+    },
+    "/admin/requirements/{id}": {
+      "put": {
+        "tags": ["Admin"],
+        "summary": "Editar un requisito.",
+        "description": "Edita un requisito a partir de su ID.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/Requirement" } }
+          }
+        },
+        "responses": {
+          "200": { "description": "Requisito editado exitosamente." }
         }
       }
     },

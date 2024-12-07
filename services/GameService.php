@@ -23,11 +23,10 @@ class GameService
         $requirements = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         $formattedRequirements = [];
-        $no = 1;
 
         foreach ($requirements as $requirement) {
             $formattedRequirements[] = [
-                'no' => $no++,
+                'id' => $requirement['id'],
                 'text' => $requirement['requirementText'],
                 'isValid' => $requirement['isValid'] == 1 ? true : false,
                 'feedback' => $requirement['feedbackText'],

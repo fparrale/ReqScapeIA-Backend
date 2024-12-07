@@ -69,7 +69,7 @@ class GptService
         return $response['id'];
     }
 
-    private static function checkCompleteStatus($threadId, $runId, $timeout = 60)
+    private static function checkCompleteStatus($threadId, $runId, $timeout = 80)
     {
         $startTime = time();
         $completed = false;
@@ -170,7 +170,10 @@ class GptService
         self::checkCompleteStatus($threadId, $runId);
 
         // Solicitar al asistente que revise y corrija el contenido generado
-        $reviewMessage = "Revisa y corrige el contenido generado previamente. Asegúrate de que esté bien redactado, claro y consistente.";
+        $reviewMessage = "Revisa y corrige el contenido generado previamente." .
+        "Asegúrate que el idioma sea el correcto, en este caso es " . $languageMap[$gameConfig->language] . "." .
+        "Además, si hay algún texto en otro idioma o incomprensible, descártalo y genera nuevos requerimientos.";
+
         self::createMessage($threadId, $reviewMessage);
 
         // Ejecutar el asistente para la validación/corrección

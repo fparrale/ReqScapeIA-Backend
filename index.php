@@ -15,6 +15,7 @@ $routes = [
     'admin/course-stats/(\d+)' => 'api/admin/course-stats.php',
     'attempts/(\d+)' => 'api/attempts/index.php',
     'game/content/(\d+)' => 'api/game/content.php',
+    'admin/requirements/(\d+)' => 'api/admin/requirements.php',
 ];
 
 $matched = false;

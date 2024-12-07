@@ -21,4 +21,22 @@ class AdminStatsController
         http_response_code(200);
         echo json_encode($requirements);
     }
+
+    public static function editRequirement($email)
+    {
+        $requirementId = $_GET['params'][0];
+        $data = json_decode(file_get_contents('php://input'), true);
+
+        if (empty($data['text']) || empty($data['feedback']) || !isset($data['isValid'])) {
+            http_response_code(400);
+            echo json_encode(['message' => 'No se proporcionaron los datos necesarios']);
+            exit;
+        }
+
+        $requirement = new RequirementEntity($requirementId, $data['text'], $data['isValid'], $data['feedback']);
+        
+        AdminService::editRequirement($email, $requirement);
+        http_response_code(200);
+        echo json_encode(['message' => 'Requisito editado con éxito']);
+    }
 }

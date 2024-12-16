@@ -5,5 +5,11 @@ RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
+<Files .env>
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+
 # Redirigir todas las solicitudes a index.php
 RewriteRule ^ index.php [L]

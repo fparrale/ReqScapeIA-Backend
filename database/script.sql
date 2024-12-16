@@ -54,4 +54,28 @@ CREATE TABLE IF NOT EXISTS requirements (
     course_id INT NOT NULL,
     FOREIGN KEY (course_id) REFERENCES courses(id)
     ON DELETE CASCADE
-)
+);
+
+CREATE TABLE IF NOT EXISTS survey_submissions (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+    ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS survey_questions (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  question_text TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS user_responses (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  survey_question_id INT NOT NULL,
+  response TINYINT NOT NULL CHECK (response BETWEEN 1 AND 5),
+  FOREIGN KEY (user_id) REFERENCES users(id)
+    ON DELETE CASCADE,
+  FOREIGN KEY (survey_question_id) REFERENCES survey_questions(id)
+    ON DELETE CASCADE
+);

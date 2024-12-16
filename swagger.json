@@ -512,6 +512,30 @@
         }
       }
     },
+    "/survey": {
+      "get": {
+        "tags": ["Survey"],
+        "summary": "Obtener las preguntas de la encuesta.",
+        "description": "Obtiene las preguntas de la encuesta.",
+        "responses": {
+          "200": { "description": "Preguntas de la encuesta obtenidas exitosamente." }
+        }
+      },
+      "post": {
+        "tags": ["Survey"],
+        "summary": "Guardar las respuestas de la encuesta.",
+        "description": "Guarda las respuestas de la encuesta.",
+        "responses": { "200": { "description": "Respuestas de la encuesta guardadas exitosamente." } }
+      }
+    },
+    "/survey/register": {
+      "post": {
+        "tags": ["Survey"],
+        "summary": "Registrar la encuesta.",
+        "description": "Registra la encuesta.",
+        "responses": { "200": { "description": "Encuesta registrada exitosamente." } }
+      }
+    },
     "/game/content/{courseId}": {
       "get": {
         "tags": ["Game"],

@@ -104,6 +104,13 @@
           "score_range": { "type": "string" },
           "count": { "type": "integer" }
         }
+      },
+      "SurveyResponse": {
+        "type": "object",
+        "properties": {
+          "surveyQuestionId": { "type": "integer" },
+          "response": { "type": "integer" }
+        }
       }
     }
   },
@@ -266,6 +273,35 @@
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/AuthResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/make-admin": {
+      "put": {
+        "tags": ["Auth"],
+        "summary": "Hacer administrador a un usuario.",
+        "description": "Hace administrador a un usuario a partir de su email.",
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "type": "object", "properties": { "email": { "type": "string" } } } }
+          }
+        },
+        "responses": { "200": {
+          "description": "Usuario actualizado correctamente.", 
+          "content": {
+            "application/json": {
+              "schema": { 
+                "type": "object", 
+                "properties": { 
+                  "ok": { "type": "boolean" },
+                  "message": { 
+                    "type": "string" 
+                    } 
+                  }
+                }
               }
             }
           }
@@ -525,6 +561,18 @@
         "tags": ["Survey"],
         "summary": "Guardar las respuestas de la encuesta.",
         "description": "Guarda las respuestas de la encuesta.",
+        "requestBody": {
+          "content": {
+            "application/json": { 
+              "schema": { 
+                "type": "object", 
+                "properties": { 
+                  "responses": { "type": "array", "items": { "$ref": "#/components/schemas/SurveyResponse" } } 
+                } 
+              } 
+            } 
+          }
+        },
         "responses": { "200": { "description": "Respuestas de la encuesta guardadas exitosamente." } }
       }
     },

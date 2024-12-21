@@ -1,5 +1,6 @@
 <?php
 require_once 'services/SurveyService.php';
+require_once 'entities/ResponseEntity.php';
 
 class SurveyController
 {
@@ -20,9 +21,25 @@ class SurveyController
     public static function saveSurveyResponses($userId)
     {
         $data = json_decode(file_get_contents('php://input'), true);
+        if (!isset($data['responses']) || !is_array($data['responses'])) {
+            http_response_code(400);
+            echo json_encode(['message' => 'El formato de las respuestas es inválido.']);
+            exit;
+        }
+
         $rawResponses = $data['responses'];
         $responses = array_map(function ($response) use ($userId) {
-            return new ResponseEntity($response['id'], $userId, $response['surveyQuestionId'], $response['response']);
+            if (!isset($response['surveyQuestionId']) || !isset($response['response'])) {
+                http_response_code(400);
+                echo json_encode(['message' => 'Una o más respuestas tienen un formato inválido.']);
+                exit;
+            }
+            if ($response['response'] < 1 || $response['response'] > 5) {
+                http_response_code(400);
+                echo json_encode(['message' => 'Una o más respuestas tienen un valor inválido.']);
+                exit;
+            }
+            return new ResponseEntity($userId, $response['surveyQuestionId'], $response['response']);
         }, $rawResponses);
 
         SurveyService::saveSurveyResponses($userId, $responses);

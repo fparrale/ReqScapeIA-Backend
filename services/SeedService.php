@@ -4,6 +4,7 @@ require_once 'entities/GameConfigEntity.php';
 require_once 'entities/CourseEntity.php';
 require_once 'services/UserService.php';
 require_once 'services/CourseService.php';
+require_once 'services/SurveyService.php';
 
 class SeedService
 {
@@ -14,12 +15,14 @@ class SeedService
         $adminId = $this->createAdminUser();
         $this->createStudents();
         $this->createCourses($adminId);
+        $this->createSurveyQuestions();
     }
 
     private function cleanDatabase()
     {
         CourseService::deleteAll();
         UserService::deleteAll();
+        SurveyService::deleteAllSurveyQuestions();
     }
 
     private function createAdminUser()
@@ -89,6 +92,23 @@ class SeedService
                 new GameConfigEntity('es', 'Aplicación de gestión del tiempo.'),
                 $adminId
             );
+        }
+    }
+
+    private function createSurveyQuestions()
+    {
+        $questions = [
+            '¿Cómo calificarías los ejemplos de requerimientos planteados en el juego?',
+            '¿Cómo calificarías la dificultad de los requerimientos planteados en el juego?',
+            '¿Qué tan útil te resultó el juego para entender los conceptos de ingeniería de requerimientos?',
+            '¿Qué tan motivante te resultó el juego para aprender los conceptos de ingeniería de requerimientos?',
+            '¿Qué tan entretenido te resultó el juego para aprender los conceptos de ingeniería de requerimientos?',
+            '¿Qué tan fácil te resultó el juego para aprender los conceptos de ingeniería de requerimientos?',
+            '¿Qué tan efectivo te resultó el juego para aprender los conceptos de ingeniería de requerimientos?',
+        ];
+
+        foreach ($questions as $question) {
+            SurveyService::createSurveyQuestion($question);
         }
     }
 }

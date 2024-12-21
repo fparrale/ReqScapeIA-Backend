@@ -172,4 +172,50 @@ class AuthController
             'user' => UserService::getInfo($user),
         ];
     }
+
+    public static function makeAdmin($email)
+    {
+        $isAdmin = UserService::isAdmin($email);
+
+        if (!$isAdmin) {
+            $response = [
+                'ok' => false,
+                'message' => 'El usuario no es administrador',
+            ];
+
+            http_response_code(400);
+            echo json_encode($response);
+            exit;
+        }
+
+        $data = json_decode(file_get_contents('php://input'), true);
+        $email = $data['email'];
+
+        $user = UserService::getByEmail($email);
+
+        if (!$user) {
+            $response = [
+                'ok' => false,
+                'message' => 'El usuario no existe',
+            ];
+
+            http_response_code(404);
+            echo json_encode($response);
+            exit;
+        }
+
+        $query = "UPDATE users SET role = 'admin' WHERE email = :email";
+        $stmt = Database::getConn()->prepare($query);
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
+
+        $response = [
+            'ok' => true,
+            'message' => 'Usuario actualizado correctamente',
+        ];
+
+        http_response_code(200);
+        echo json_encode($response);
+        exit;
+    }
 }

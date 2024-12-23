@@ -16,6 +16,8 @@ O instalación local de:
 2. Crear un archivo .env con las siguientes variables:
 
 ```
+APP_ENV=development
+
 DB_HOST=
 DB_NAME=
 DB_USER=

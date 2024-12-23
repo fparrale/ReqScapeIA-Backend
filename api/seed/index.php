@@ -15,7 +15,13 @@ if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($_SERVER['PHP_AUTH_PW']) ||
     exit;
 }
 
-// Si las credenciales son correctas, ejecuta el seed
+// Verificar si el entorno es de producción
+if (getenv('APP_ENV') === 'production') {
+    echo json_encode(['error' => 'No se puede ejecutar el seed en producción']);
+    exit;
+}
+
+// Si las credenciales son correctas y no es producción, ejecuta el seed
 try {
     SeedController::seed();
     echo json_encode(['message' => 'Seed ejecutado con éxito']);

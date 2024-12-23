@@ -5,6 +5,8 @@ RewriteEngine On
     Deny from all
 </Files>
 
+RewriteBase /sof-req-game/
+
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 

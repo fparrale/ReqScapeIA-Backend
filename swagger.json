@@ -5,6 +5,16 @@
     "description": "API para el juego de clasificación de requerimientos de software.",
     "version": "1.0.0"
   },
+  "servers": [
+    {
+      "url": "/sof-req-game",
+      "description": "URL base del servidor [PROD]"
+    },
+    {
+      "url": "/",
+      "description": "URL base del servidor [DEV]"
+    }
+  ],
   "tags": [
     {
       "name": "Auth",

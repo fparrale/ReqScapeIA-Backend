@@ -27,16 +27,36 @@ SOF_REQ_ASSISTANT_ID=
 
 SEED_USER=
 SEED_PASSWORD=
+
+SUB_FOLDER_NAME=
 ```
 
-3. Construir la imagen Docker
+3. Para desarrollo, clonar el archivo .htaccess.development y renombrarlo a .htaccess.
+
+4. Construir la imagen Docker
 
 ```
 docker compose build
 ```
 
-4. Ejecutar la imagen Docker
+5. Ejecutar la imagen Docker
 
 ```
 docker compose up -d
 ```
+
+## Configuración para producción
+
+1. Si la aplicación se va a desplegar en un subdirectorio, se debe configurar la variable **SUB_FOLDER_NAME** en el archivo `.env`.
+
+```
+SUB_FOLDER_NAME=<nombre_del_subdirectorio>
+```
+
+Ejemplo:
+
+```
+SUB_FOLDER_NAME=sof-req-game
+```
+
+2. Para producción, clonar el archivo `.htaccess.production` y renombrarlo a `.htaccess`.

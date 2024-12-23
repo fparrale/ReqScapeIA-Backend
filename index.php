@@ -7,6 +7,14 @@ require_once 'config/Environment.php';
 Environment::loadEnv(__DIR__ . '/.env');
 
 $uri = trim($_SERVER['REQUEST_URI'], '/');
+
+// Adjust the URI to remove the base folder if it exists
+$subFolderName = getenv('SUB_FOLDER_NAME');
+if (strpos($uri, $subFolderName . '/') === 0) {
+    $uri = substr($uri, strlen($subFolderName . '/'));
+    var_dump($uri);
+}
+
 $method = $_SERVER['REQUEST_METHOD'];
 
 $routes = [

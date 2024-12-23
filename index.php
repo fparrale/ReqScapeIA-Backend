@@ -12,7 +12,6 @@ $uri = trim($_SERVER['REQUEST_URI'], '/');
 $subFolderName = getenv('SUB_FOLDER_NAME');
 if (strpos($uri, $subFolderName . '/') === 0) {
     $uri = substr($uri, strlen($subFolderName . '/'));
-    var_dump($uri);
 }
 
 $method = $_SERVER['REQUEST_METHOD'];

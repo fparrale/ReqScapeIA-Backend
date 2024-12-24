@@ -58,7 +58,7 @@ SUB_FOLDER_NAME=<nombre_del_subdirectorio>
 Ejemplo:
 
 ```
-SUB_FOLDER_NAME=sof-req-game
+SUB_FOLDER_NAME=ReqScapeNew
 ```
 
 2. Para producción, clonar el archivo `.htaccess.production` y renombrarlo a `.htaccess`.

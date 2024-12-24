@@ -5,9 +5,12 @@ RewriteEngine On
     Deny from all
 </Files>
 
-RewriteBase /sof-req-game/
+RewriteBase /ReqScapeNew/
 
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
+
+RewriteCond %{HTTP:Authorization} ^(.*)
+RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
 
 RewriteRule ^ index.php [L]

@@ -1,7 +1,7 @@
 window.onload = function() {
   //<editor-fold desc="Changeable Configuration Block">
 
-  const folderName = 'sof-req-game';
+  const folderName = 'ReqScapeNew';
   const firstSegment = window.location.pathname.split('/')[1];
   const containsPrefix = firstSegment === folderName;
 

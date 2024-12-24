@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "/sof-req-game",
+      "url": "/ReqScapeNew",
       "description": "URL base del servidor [PROD]"
     },
     {

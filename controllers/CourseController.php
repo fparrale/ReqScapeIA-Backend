@@ -24,8 +24,7 @@ class CourseController
         $items_per_attempt = $data['items_per_attempt'] ?? null;
         $max_attempts = $data['max_attempts'] ?? null;
 
-        $language = $data['language'] ?? null;
-        $additional_context = $data['additional_context'] ?? null;
+        $content_mode = $data['content_mode'] ?? null;
 
         if (empty($course_name)) {
             http_response_code(400);
@@ -47,11 +46,24 @@ class CourseController
             return;
         }
 
-        $courseEntity = new CourseEntity($course_name, $course_code, $items_per_attempt, $max_attempts);
+        $language = null;
+        $additional_context = null;
+        $requirements = [];
+
+        if ($content_mode === 'generated') {
+            $language = $data['language'] ?? null;
+            $additional_context = $data['additional_context'] ?? null;
+        }
+
+        if ($content_mode === 'file_upload') {
+            $requirements = $data['requirements'] ?? [];
+        }
+
+        $courseEntity = new CourseEntity($course_name, $course_code, $items_per_attempt, $max_attempts, $content_mode);
         $gameConfigEntity = new GameConfigEntity($language, $additional_context);
 
         try {
-            $createdCourse = CourseService::create($courseEntity, $gameConfigEntity, $id);
+            $createdCourse = CourseService::create($courseEntity, $gameConfigEntity, $requirements, $id);
             http_response_code(201);
             echo json_encode($createdCourse);
         } catch (Exception $e) {

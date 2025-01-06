@@ -10,7 +10,7 @@ $uri = trim($_SERVER['REQUEST_URI'], '/');
 
 // Adjust the URI to remove the base folder if it exists
 $subFolderName = getenv('SUB_FOLDER_NAME');
-if (strpos($uri, $subFolderName . '/') === 0) {
+if (!empty($subFolderName) && strpos($uri, $subFolderName . '/') === 0) {
     $uri = substr($uri, strlen($subFolderName . '/'));
 }
 

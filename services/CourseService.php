@@ -8,7 +8,7 @@ require_once 'services/GptService.php';
 class CourseService
 {
 
-    public static function create(CourseEntity $course, GameConfigEntity $gameConfig, $user_id)
+    public static function create(CourseEntity $course, GameConfigEntity $gameConfig, $requirements, $user_id)
     {
         try {
             Database::getConn()->beginTransaction();
@@ -27,8 +27,14 @@ class CourseService
 
             $courseId = Database::getConn()->lastInsertId();
 
-            $response = GptService::generateRequirements($gameConfig);
-            self::saveRequirements($courseId, $response['requirements']);
+            if ($course->content_mode === 'generated') {
+                $response = GptService::generateRequirements($gameConfig);
+                self::saveRequirements($courseId, $response['requirements']);
+            }
+
+            if ($course->content_mode === 'file_upload') {
+                self::saveRequirements($courseId, $requirements);
+            }
 
             Database::getConn()->commit();
 
@@ -128,21 +134,24 @@ class CourseService
 
     public static function saveRequirements($courseId, $requirements)
     {
-        foreach ($requirements as $requirement) {
-            $query = "INSERT INTO requirements (requirementText, isValid, feedbackText, course_id) VALUES (:requirementText, :isValid, :feedbackText, :course_id)";
-            $stmt = Database::getConn()->prepare($query);
-            $requirementText = htmlspecialchars($requirement['text']);
-            $feedbackText = htmlspecialchars($requirement['feedback']);
-            $stmt->bindParam(':requirementText', $requirementText);
-            $stmt->bindParam(':isValid', $requirement['isValid'], PDO::PARAM_INT);
-            $stmt->bindParam(':feedbackText', $feedbackText);
-            $stmt->bindParam(':course_id', $courseId);
+        try {
+            foreach ($requirements as $requirement) {
+                $query = "INSERT INTO requirements (requirementText, isValid, feedbackText, course_id) VALUES (:requirementText, :isValid, :feedbackText, :course_id)";
+                $stmt = Database::getConn()->prepare($query);
+                $requirementText = htmlspecialchars($requirement['text']);
+                $feedbackText = htmlspecialchars($requirement['feedback']);
+                $stmt->bindParam(':requirementText', $requirementText);
+                $stmt->bindParam(':isValid', $requirement['isValid'], PDO::PARAM_INT);
+                $stmt->bindParam(':feedbackText', $feedbackText);
+                $stmt->bindParam(':course_id', $courseId);
 
-            if (!$stmt->execute()) {
-                return false;
+                if (!$stmt->execute()) {
+                    throw new Exception('Ocurrió un error al guardar los requisitos');
+                }
             }
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
         }
-        return true;
     }
 
     private static function checkIfCourseExists($courseId)

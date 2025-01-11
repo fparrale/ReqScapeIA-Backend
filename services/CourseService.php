@@ -1,6 +1,7 @@
 <?php
 
 require_once 'entities/CourseEntity.php';
+require_once 'entities/UpdateCourseEntity.php';
 require_once 'entities/GameConfigEntity.php';
 require_once 'config/Database.php';
 require_once 'services/GptService.php';
@@ -41,6 +42,22 @@ class CourseService
             return self::getById($courseId);
         } catch (Exception $e) {
             Database::getConn()->rollBack();
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    public static function update($courseId, UpdateCourseEntity $course)
+    {
+        try {
+            $query = "UPDATE courses SET course_name = :course_name, items_per_attempt = :items_per_attempt, max_attempts = :max_attempts WHERE id = :course_id";
+            $stmt = Database::getConn()->prepare($query);
+            $stmt->bindParam(':course_name', $course->course_name);
+            $stmt->bindParam(':items_per_attempt', $course->items_per_attempt);
+            $stmt->bindParam(':max_attempts', $course->max_attempts);
+            $stmt->bindParam(':course_id', $courseId);
+            $stmt->execute();
+            return true;
+        } catch (Exception $e) {
             throw new Exception($e->getMessage());
         }
     }

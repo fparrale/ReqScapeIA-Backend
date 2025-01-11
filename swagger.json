@@ -7,10 +7,6 @@
   },
   "servers": [
     {
-      "url": "/ReqScapeNew",
-      "description": "URL base del servidor [PROD]"
-    },
-    {
       "url": "/",
       "description": "URL base del servidor [DEV]"
     }
@@ -120,6 +116,14 @@
         "properties": {
           "surveyQuestionId": { "type": "integer" },
           "response": { "type": "integer" }
+        }
+      },
+      "UpdateCourseEntity": {
+        "type": "object",
+        "properties": {
+          "course_name": { "type": "string" },
+          "items_per_attempt": { "type": "integer" },
+          "max_attempts": { "type": "integer" }
         }
       }
     }
@@ -372,6 +376,28 @@
       }
     },
     "/courses/{id}": {
+      "put": {
+        "tags": ["Course"],
+        "summary": "Actualizar un curso.",
+        "description": "Actualiza un curso a partir de su ID.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/UpdateCourseEntity" } }
+          }
+        },
+        "responses": {
+          "200": { "description": "Curso actualizado correctamente." },
+          "400": { "description": "Error al actualizar el curso." }
+        }
+      },
       "delete": {
         "tags": ["Course"],
         "summary": "Eliminar un curso.",

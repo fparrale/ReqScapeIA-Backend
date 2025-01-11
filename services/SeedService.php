@@ -78,6 +78,8 @@ class SeedService
                 'course_name' => 'Ingeniería de Requerimientos',
                 'items_per_attempt' => 5,
                 'max_attempts' => 3,
+                'content_mode' => 'generated',
+                'requirements' => [],
             ],
         ];
 
@@ -88,8 +90,10 @@ class SeedService
                     $course['course_code'],
                     $course['items_per_attempt'],
                     $course['max_attempts'],
+                    $course['content_mode'],
                 ),
                 new GameConfigEntity('es', 'Aplicación de gestión del tiempo.'),
+                $course['requirements'],
                 $adminId
             );
         }

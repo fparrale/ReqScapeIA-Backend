@@ -16,6 +16,9 @@ switch ($method) {
     case 'POST':
         CourseController::createCourse($user_id, $email);
         break;
+    case 'PUT':
+        CourseController::updateCourse($user_id, $email);
+        break;
     case 'DELETE':
         CourseController::deleteCourse($user_id, $email);
         break;

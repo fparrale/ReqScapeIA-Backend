@@ -72,6 +72,39 @@ class CourseController
         }
     }
 
+    public static function updateCourse($id, $email)
+    {
+        $data = json_decode(file_get_contents('php://input'), true);
+        $courseId = $_GET['params'][0] ?? null;
+
+        if (!$courseId) {
+            http_response_code(400);
+            echo json_encode(['message' => 'ID de curso no proporcionado.']);
+            return;
+        }
+
+        $course = CourseService::getById($courseId);
+
+        if (!$course) {
+            http_response_code(400);
+            echo json_encode(['message' => 'Curso no encontrado.']);
+            return;
+        }
+
+        $updateCourseEntity = new UpdateCourseEntity($data['course_name'], $data['items_per_attempt'], $data['max_attempts']);
+
+        $updatedCourse = CourseService::update($courseId, $updateCourseEntity);
+
+        if (!$updatedCourse) {
+            http_response_code(500);
+            echo json_encode(['message' => 'Error al actualizar el curso.']);
+            return;
+        }
+
+        http_response_code(200);
+        echo json_encode(['message' => 'Curso actualizado exitosamente.']);
+    }
+
     public static function getAllCourses($id, $email)
     {
         $courses = CourseService::getAllByUserId($id);

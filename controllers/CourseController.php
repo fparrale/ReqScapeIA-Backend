@@ -179,4 +179,28 @@ class CourseController
         http_response_code(200);
         echo json_encode(['message' => 'Curso eliminado exitosamente.']);
     }
+
+    public static function existsAttempts($id, $email)
+    {
+        $isAdmin = UserService::isAdmin($email);
+
+        if (!$isAdmin) {
+            http_response_code(400);
+            echo json_encode(['message' => 'Acceso denegado. Solo los administradores pueden verificar si hay intentos.']);
+            return;
+        }
+
+        $courseId = $_GET['params'][0] ?? null;
+
+        if (!$courseId) {
+            http_response_code(400);
+            echo json_encode(['message' => 'ID de curso no proporcionado.']);
+            return;
+        }
+
+        $exists = CourseService::checkIfThereIsAnyAttempts($courseId);
+
+        http_response_code(200);
+        echo json_encode(['hasAttempts' => $exists]);
+    }
 }

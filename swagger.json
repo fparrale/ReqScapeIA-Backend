@@ -322,6 +322,31 @@
         }
       }
     },
+    "/courses/exists-attempts/{courseId}": {
+      "get": {
+        "tags": ["Course"],
+        "summary": "Verificar si hay intentos para un curso.",
+        "description": "Verifica si hay intentos para un curso a partir de su ID.",
+        "parameters": [
+          { "in": "path", "name": "courseId", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { 
+          "200": { 
+            "description": "Intentos verificados exitosamente.",
+            "content": { 
+              "application/json": { 
+                "schema": { 
+                  "type": "object", 
+                  "properties": { 
+                    "hasAttempts": { "type": "boolean" } 
+                  } 
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/courses": {
       "get": {
         "tags": ["Course"],

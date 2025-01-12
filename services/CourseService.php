@@ -89,6 +89,18 @@ class CourseService
         return $result;
     }
 
+    public static function checkIfThereIsAnyAttempts($courseId)
+    {
+        self::checkIfCourseExists($courseId);
+        
+        $query = "SELECT COUNT(*) AS attempt_count FROM attempts WHERE course_id = :course_id";
+        $stmt = Database::getConn()->prepare($query);
+        $stmt->bindParam(':course_id', $courseId);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['attempt_count'] > 0;
+    }
+
     public static function enroll($user_id, $courseId)
     {
         $query = "INSERT INTO enrolled_courses (user_id, course_id) VALUES (:user_id, :course_id)";

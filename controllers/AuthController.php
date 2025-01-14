@@ -53,18 +53,6 @@ class AuthController
             return;
         }
 
-        if (strpos($email, '@ug.edu.ec') === false || substr($email, -9) !== 'ug.edu.ec') {
-            $response = [
-                'ok' => false,
-                'message' => 'El correo electrónico debe ser del dominio @ug.edu.ec.',
-                'user' => null,
-            ];
-
-            http_response_code(400);
-            echo json_encode($response);
-            return;
-        }
-
         $takenUser = UserService::getByEmail($email);
 
         if ($takenUser) {

@@ -20,6 +20,7 @@ $routes = [
     'courses/(\d+)' => 'api/courses/index.php',
     'courses/exists-attempts/(\d+)' => 'api/courses/exists-attempts.php',
     'admin/course-content/(\d+)' => 'api/admin/course-content.php',
+    'admin/course-content/(\d+)/(\d+)' => 'api/admin/course-content.php',
     'admin/course-stats/(\d+)' => 'api/admin/course-stats.php',
     'attempts/(\d+)' => 'api/attempts/index.php',
     'game/content/(\d+)' => 'api/game/content.php',

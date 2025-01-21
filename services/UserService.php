@@ -16,9 +16,31 @@ class UserService
         return $result;
     }
 
+    public static function getById($userId)
+    {
+        $query = "SELECT * FROM users WHERE id = :userId";
+        $stmt = Database::getConn()->prepare($query);
+        $stmt->bindParam(':userId', $userId);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (empty($result)) {
+            return null;
+        }
+        return $result;
+    }
+
     public static function isAdmin($email)
     {
         $user = self::getByEmail($email);
+        if (is_null($user)) {
+            return false;
+        }
+        return $user['role'] === 'admin';
+    }
+
+    public static function isAdminById($userId)
+    {
+        $user = self::getById($userId);
         if (is_null($user)) {
             return false;
         }

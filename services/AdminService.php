@@ -203,6 +203,21 @@ class AdminService
         return true;
     }
 
+    public static function deleteCourseRequirement($userId, $courseId, $requirementId)
+    {
+        self::checkIfAdminById($userId);
+        self::checkIfCourseExists($courseId);
+        self::checkIfCourseBelongsToUser($courseId, $userId);
+        self::checkIfRequirementExists($requirementId);
+
+        $query = "DELETE FROM requirements WHERE id = :requirement_id";
+        $stmt = Database::getConn()->prepare($query);
+        $stmt->bindParam(':requirement_id', $requirementId);
+        $stmt->execute();
+
+        return true;
+    }
+
     private static function checkIfCourseExists($courseId)
     {
         $courseExists = CourseService::getById($courseId);
@@ -212,6 +227,17 @@ class AdminService
             exit;
         }
         return $courseExists;
+    }
+
+    private static function checkIfCourseBelongsToUser($courseId, $userId)
+    {
+        $courseBelongsToUser = CourseService::checkIfCourseBelongsToUser($courseId, $userId);
+        if (!$courseBelongsToUser) {
+            http_response_code(403);
+            echo json_encode(['message' => 'Acceso denegado']);
+            exit;
+        }
+        return true;
     }
 
     private static function checkIfRequirementExists($requirementId)
@@ -235,6 +261,17 @@ class AdminService
     private static function checkIfAdmin($adminEmail)
     {
         $isAdmin = UserService::isAdmin($adminEmail);
+        if (!$isAdmin) {
+            http_response_code(403);
+            echo json_encode(['message' => 'Acceso denegado']);
+            exit;
+        }
+        return $isAdmin;
+    }
+
+    private static function checkIfAdminById($userId)
+    {
+        $isAdmin = UserService::isAdminById($userId);
         if (!$isAdmin) {
             http_response_code(403);
             echo json_encode(['message' => 'Acceso denegado']);

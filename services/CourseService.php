@@ -193,4 +193,15 @@ class CourseService
         }
         return $courseExists;
     }
+
+    public static function checkIfCourseBelongsToUser($courseId, $userId)
+    {
+        $course = CourseService::getById($courseId);
+
+        if ($course['user_id'] !== $userId) {
+            return false;
+        }
+
+        return true;
+    }
 }

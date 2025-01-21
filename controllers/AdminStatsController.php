@@ -39,4 +39,21 @@ class AdminStatsController
         http_response_code(200);
         echo json_encode(['message' => 'Requisito editado con éxito']);
     }
+
+    public static function deleteCourseRequirement($userId)
+    {
+        
+        $courseId = $_GET['params'][0] ?? null;
+        $requirementId = $_GET['params'][1] ?? null;
+
+        if (empty($courseId) || empty($requirementId)) {
+            http_response_code(400);
+            echo json_encode(['message' => 'Formato no válido para courseId o requirementId']);
+            exit;
+        }
+        
+        AdminService::deleteCourseRequirement($userId, $courseId, $requirementId);
+        http_response_code(200);
+        echo json_encode(['message' => 'Requisito eliminado con éxito']);
+    }
 }

@@ -71,6 +71,23 @@ class UserService
         return Database::getConn()->lastInsertId();
     }
 
+    public static function getStudentsByCourse($courseId)
+    {
+        $query = "SELECT u.* FROM users u JOIN enrolled_courses ec ON u.id = ec.user_id WHERE ec.course_id = :courseId";
+        $stmt = Database::getConn()->prepare($query);
+        $stmt->bindParam(':courseId', $courseId);
+        $stmt->execute();
+        $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $formattedStudents = [];
+        
+        foreach ($students as $key => $student) {
+            array_push($formattedStudents, self::getInfo($student));
+        }
+        
+        return $formattedStudents;
+    }
+
     public static function deleteAll()
     {
         $query = "DELETE FROM users";

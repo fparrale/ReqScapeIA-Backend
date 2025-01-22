@@ -3,7 +3,7 @@ require_once 'config/Database.php';
 require_once 'services/CourseService.php';
 class AttemptService {
 
-    public static function registerAttempt($user_id, $courseId, $totalreq) {
+    public static function registerAttempt($user_id, $courseId, $totalreq, $requirements) {
 
         $course = CourseService::getById($courseId);
 
@@ -33,6 +33,16 @@ class AttemptService {
         }
         
         $attemptId = (int) Database::getConn()->lastInsertId();
+
+        foreach ($requirements as $requirement) {
+            $query = "INSERT INTO requirements_classification_attempts (attempt_id, requirement_id, result) VALUES (:attempt_id, :requirement_id, :result)";
+            $stmt = Database::getConn()->prepare($query);
+            $stmt->bindParam(':attempt_id', $attemptId);
+            $stmt->bindParam(':requirement_id', $requirement['id']);
+            $stmt->bindParam(':result', $requirement['result']);
+            $stmt->execute();
+        }
+
         http_response_code(201);
         echo json_encode(['id' => $attemptId]);
     }
@@ -58,7 +68,7 @@ class AttemptService {
         ];
     }
 
-    public static function updateStatsAndStatus($attemptId, $status, $score, $movements, $time) {
+    public static function updateStatsAndStatus($attemptId, $status, $score, $movements, $time, $requirements) {
         self::getAttemptById($attemptId);
 
         $query = "UPDATE attempts SET status = :status, score = :score, movements = :movements, time = :time WHERE id = :attemptId";
@@ -73,6 +83,15 @@ class AttemptService {
             http_response_code(500);
             echo json_encode(['message' => 'Error al actualizar las estadisticas y el estado del intento.']);
             return;
+        }
+
+        foreach ($requirements as $requirement) {
+            $query = "UPDATE requirements_classification_attempts SET result = :result WHERE attempt_id = :attemptId AND requirement_id = :requirement_id";
+            $stmt = Database::getConn()->prepare($query);
+            $stmt->bindParam(':attemptId', $attemptId);
+            $stmt->bindParam(':requirement_id', $requirement['id']);
+            $stmt->bindParam(':result', $requirement['result']);
+            $stmt->execute();
         }
 
         http_response_code(200);
@@ -95,4 +114,35 @@ class AttemptService {
         return $attempt;
     }
 
+    public static function getAttemptResult($attemptId) {
+        $query = "SELECT
+            rca.id as id,
+            rca.requirement_id as requirementId,
+            r.requirementText as text,
+            r.feedbackText as feedback,
+            r.isValid as isValid,
+            rca.result as result
+        FROM requirements_classification_attempts rca
+        JOIN requirements r ON rca.requirement_id = r.id
+        WHERE rca.attempt_id = :attemptId";
+
+        $stmt = Database::getConn()->prepare($query);
+        $stmt->bindParam(':attemptId', $attemptId);
+        $stmt->execute();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $formattedResult = [];
+        foreach ($result as $item) {
+            $formattedResult[] = [
+                'id' => $item['id'],
+                'requirementId' => $item['requirementId'],
+                'text' => $item['text'],
+                'feedback' => $item['feedback'],
+                'isValid' => $item['isValid'] == 1 ? true : false,
+                'result' => $item['result']
+            ];
+        }
+
+        return $formattedResult;
+    }
 }

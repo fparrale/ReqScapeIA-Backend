@@ -13,6 +13,34 @@ class AdminStatsController
         echo json_encode($stats);
     }
 
+    public static function getStudentsByCourse($email)
+    {
+        $courseId = $_GET['params'][0];
+
+        $students = AdminService::getStudentsByCourse($email, $courseId);
+        http_response_code(200);
+        echo json_encode($students);
+    }
+
+    public static function getStudentById($email)
+    {
+        $studentId = $_GET['params'][0];
+
+        $student = AdminService::getStudentById($email, $studentId);
+        http_response_code(200);
+        echo json_encode($student);
+    }
+
+    public static function getStudentGameHistory($email)
+    {
+        $courseId = $_GET['params'][0];
+        $studentId = $_GET['params'][1];
+
+        $history = AdminService::getStudentGameHistory($email, $courseId, $studentId);
+        http_response_code(200);
+        echo json_encode($history);
+    }
+
     public static function getGeneratedRequirementsByCourse($email)
     {
         $courseId = $_GET['params'][0];
@@ -55,5 +83,14 @@ class AdminStatsController
         AdminService::deleteCourseRequirement($userId, $courseId, $requirementId);
         http_response_code(200);
         echo json_encode(['message' => 'Requisito eliminado con éxito']);
+    }
+
+    public static function getAttemptResult($email)
+    {
+        $attemptId = $_GET['params'][0];
+
+        $result = AdminService::getAttemptResult($email, $attemptId);
+        http_response_code(200);
+        echo json_encode($result);
     }
 }

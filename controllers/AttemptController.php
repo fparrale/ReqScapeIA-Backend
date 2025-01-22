@@ -15,8 +15,9 @@ class AttemptController {
         $data = json_decode(file_get_contents('php://input'), true);
         $courseId = $data['course_id'] ?? null;
         $totalreq = $data['totalreq'] ?? null;
+        $requirements = $data['requirements'] ?? null;
 
-        AttemptService::registerAttempt($user_id, $courseId, $totalreq);
+        AttemptService::registerAttempt($user_id, $courseId, $totalreq, $requirements);
     }
 
     public static function updateStatsAndStatus($user_id) {
@@ -26,7 +27,8 @@ class AttemptController {
         $score = $data['score'] ?? null;
         $movements = $data['movements'] ?? null;
         $time = $data['time'] ?? null;
+        $requirements = $data['requirements'] ?? null;
 
-        AttemptService::updateStatsAndStatus($attemptId, $status, $score, $movements, $time);
+        AttemptService::updateStatsAndStatus($attemptId, $status, $score, $movements, $time, $requirements);
     }
 }

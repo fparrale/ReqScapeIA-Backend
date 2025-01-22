@@ -3,6 +3,7 @@
 require_once 'services/UserService.php';
 require_once 'services/CourseService.php';
 require_once 'services/AttemptService.php';
+require_once 'services/StudentService.php';
 require_once 'entities/RequirementEntity.php';
 require_once 'config/Database.php';
 
@@ -28,6 +29,45 @@ class AdminService
         ];
 
         return $stats;
+    }
+
+    public static function getStudentsByCourse($adminEmail, $courseId)
+    {
+        self::checkIfAdmin($adminEmail);
+        self::checkIfCourseExists($courseId);
+
+        $students = UserService::getStudentsByCourse($courseId);
+        return $students;
+    }
+
+    public static function getStudentById($adminEmail, $studentId)
+    {
+        self::checkIfAdmin($adminEmail);
+        $student = UserService::getById($studentId);
+        return UserService::getInfo($student);
+    }
+
+    public static function getStudentGameHistory($adminEmail, $courseId, $studentId)
+    {
+        self::checkIfAdmin($adminEmail);
+        self::checkIfCourseExists($courseId);
+        
+        $student = UserService::getById($studentId);
+        if (!$student) {
+            http_response_code(404);
+            echo json_encode(['message' => 'Estudiante no encontrado']);
+            exit;
+        }
+
+        $history = StudentService::getStudentGameHistoryByCourse($studentId, $courseId);
+        return $history;
+    }
+
+    public static function getAttemptResult($adminEmail, $attemptId)
+    {
+        self::checkIfAdmin($adminEmail);
+        $result = AttemptService::getAttemptResult($attemptId);
+        return $result;
     }
 
     private static function getScoreAverageByCourse($courseId)

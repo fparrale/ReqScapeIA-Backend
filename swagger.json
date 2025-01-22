@@ -34,6 +34,17 @@
       }
     },
     "schemas": {
+      "RequirementAttempt": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "requirementId": { "type": "integer" },
+          "text": { "type": "string" },
+          "feedback": { "type": "string" },
+          "isValid": { "type": "boolean" },
+          "result": { "type": "string", "enum": ["correct", "incorrect", "not-classified"] }
+        }
+      },
       "AuthResponse": {
         "type": "object",
         "properties": {
@@ -49,6 +60,15 @@
               "role": { "type": "string" }
             }
           }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "email": { "type": "string" },
+          "first_name": { "type": "string" },
+          "last_name": { "type": "string" }
         }
       },
       "Course": {
@@ -130,6 +150,22 @@
   },
   "security": [{ "bearerAuth": [] }],
   "paths": {
+    "/admin/attempt-result/{attemptId}": {
+      "get": {
+        "tags": ["Admin"],
+        "summary": "Obtener los resultados de un intento.",
+        "description": "Obtiene los resultados de un intento a partir de su ID.",
+        "parameters": [
+          { "in": "path", "name": "attemptId", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultados del intento obtenidos exitosamente.",
+            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/RequirementAttempt" } } } }
+          }
+        }
+      }
+    },
     "/admin/course-content/{id}": {
       "get": {
         "tags": ["Admin"],
@@ -180,6 +216,39 @@
                 } 
               } 
             }
+          }
+        }
+      }
+    },
+    "/admin/students/{courseId}": {
+      "get": {
+        "tags": ["Admin"],
+        "summary": "Obtener los estudiantes de un curso.",
+        "description": "Obtiene los estudiantes de un curso a partir de su ID.",
+        "parameters": [
+          { "in": "path", "name": "courseId", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estudiantes obtenidos exitosamente.",
+            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/User" } } } }
+          }
+        }
+      }
+    },
+    "/admin/student-history/{courseId}/{studentId}": {
+      "get": {
+        "tags": ["Admin"],
+        "summary": "Obtener el historial de un estudiante en un curso.",
+        "description": "Obtiene el historial de un estudiante en un curso a partir de su ID.",
+        "parameters": [
+          { "in": "path", "name": "courseId", "required": true, "schema": { "type": "integer" } },
+          { "in": "path", "name": "studentId", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Historial del estudiante obtenido exitosamente.",
+            "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Attempt" } } } }
           }
         }
       }
@@ -750,6 +819,9 @@
                         "type": "string"
                       },
                       "max_attempts": {
+                        "type": "integer"
+                      },
+                      "items_per_attempt": {
                         "type": "integer"
                       }
                     }

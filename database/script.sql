@@ -56,6 +56,17 @@ CREATE TABLE IF NOT EXISTS requirements (
     ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS requirements_classification_attempts (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  attempt_id INT NOT NULL,
+  requirement_id INT NOT NULL,
+  result ENUM('correct', 'incorrect', 'not-classified') NOT NULL DEFAULT 'not-classified',
+  FOREIGN KEY (attempt_id) REFERENCES attempts(id)
+    ON DELETE CASCADE,
+  FOREIGN KEY (requirement_id) REFERENCES requirements(id)
+    ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS survey_submissions (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,

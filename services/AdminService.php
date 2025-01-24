@@ -65,7 +65,6 @@ class AdminService
 
     public static function getAttemptResult($adminEmail, $attemptId)
     {
-        self::checkIfAdmin($adminEmail);
         $result = AttemptService::getAttemptResult($attemptId);
         return $result;
     }
@@ -117,7 +116,7 @@ class AdminService
     private static function getDropoutRateByCourse($courseId)
     {
         $query = "SELECT 
-            (SUM(CASE WHEN a.status = 'abandoned' THEN 1 ELSE 0 END) * 100.0 / COUNT(a.id)) AS abandonment_rate
+            (SUM(CASE WHEN a.status = 'abandoned' THEN 1 ELSE 0 END) / COUNT(a.id)) AS abandonment_rate
         FROM 
             courses c
         JOIN 

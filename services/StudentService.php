@@ -13,7 +13,25 @@ class StudentService
 
         $user = UserService::getByEmail($email);
 
-        $query = "SELECT * FROM attempts INNER JOIN courses ON attempts.course_id = courses.id WHERE attempts.user_id = :user_id ORDER BY attempts.created_at DESC";
+        $query = "SELECT 
+            a.id as id,
+            a.user_id as user_id,
+            a.course_id as course_id,
+            a.totalreq,
+            a.movements,
+            a.score,
+            a.status,
+            a.time,
+            a.created_at as created_at,
+            c.course_name as course_name,
+            c.course_code as course_code,
+            c.max_attempts as max_attempts,
+            c.items_per_attempt as items_per_attempt
+        FROM attempts a
+        JOIN courses c ON a.course_id = c.id 
+        WHERE a.user_id = :user_id
+        ORDER BY a.created_at DESC";
+        
         $stmt = Database::getConn()->prepare($query);
         $stmt->bindParam(':user_id', $user['id']);
         $stmt->execute();
